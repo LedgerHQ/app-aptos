@@ -2,12 +2,13 @@
 #include "deserialize.h"
 #include "utils.h"
 #include "types.h"
+#include "../constants.h"
 #include "../common/buffer.h"
 #include "../bcs/init.h"
 #include "../bcs/decoder.h"
 
 parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
-    if (buf->size > MAX_TX_LEN) {
+    if (buf->size > MAX_TRANSACTION_LEN) {
         return WRONG_LENGTH_ERROR;
     }
     transaction_init(tx);
@@ -22,6 +23,12 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
             return tx_raw_deserialize(buf, tx);
         case TX_RAW_WITH_DATA:
         case TX_MESSAGE:
+            // To make sure the message is a null-terminated string
+            if (buf->size == MAX_TRANSACTION_LEN && buf->ptr[MAX_TRANSACTION_LEN - 1] != 0) {
+                return WRONG_LENGTH_ERROR;
+            }
+
+            __attribute__((fallthrough));
         default:
             break;
     }
@@ -94,6 +101,7 @@ parser_status_e tx_raw_deserialize(buffer_t *buf, transaction_t *tx) {
 }
 
 parser_status_e tx_variant_deserialize(buffer_t *buf, transaction_t *tx) {
+    parser_status_e status = TX_VARIANT_UNDEFINED_ERROR;
     if (buf->offset != 0) {
         return TX_VARIANT_READ_ERROR;
     }
@@ -102,18 +110,18 @@ parser_status_e tx_variant_deserialize(buffer_t *buf, transaction_t *tx) {
 
     uint8_t *prefix;
     // read hashed prefix bytes
-    if (!bcs_read_ptr_to_fixed_bytes(buf, &prefix, TX_HASHED_PREFIX_LEN)) {
-        return HASHED_PREFIX_READ_ERROR;
-    }
+    if (bcs_read_ptr_to_fixed_bytes(buf, &prefix, TX_HASHED_PREFIX_LEN)) {
+        if (memcmp(prefix, PREFIX_RAW_TX_WITH_DATA_HASHED, TX_HASHED_PREFIX_LEN) == 0) {
+            tx->tx_variant = TX_RAW_WITH_DATA;
+            return PARSING_OK;
+        }
 
-    if (memcmp(prefix, PREFIX_RAW_TX_WITH_DATA_HASHED, TX_HASHED_PREFIX_LEN) == 0) {
-        tx->tx_variant = TX_RAW_WITH_DATA;
-        return PARSING_OK;
-    }
-
-    if (memcmp(prefix, PREFIX_RAW_TX_HASHED, TX_HASHED_PREFIX_LEN) == 0) {
-        tx->tx_variant = TX_RAW;
-        return PARSING_OK;
+        if (memcmp(prefix, PREFIX_RAW_TX_HASHED, TX_HASHED_PREFIX_LEN) == 0) {
+            tx->tx_variant = TX_RAW;
+            return PARSING_OK;
+        }
+    } else {
+        status = HASHED_PREFIX_READ_ERROR;
     }
 
     if (transaction_utils_check_encoding(buf->ptr, buf->size)) {
@@ -122,7 +130,7 @@ parser_status_e tx_variant_deserialize(buffer_t *buf, transaction_t *tx) {
         return PARSING_OK;
     }
 
-    return TX_VARIANT_UNDEFINED_ERROR;
+    return status;
 }
 
 parser_status_e entry_function_payload_deserialize(buffer_t *buf, transaction_t *tx) {
@@ -323,14 +331,14 @@ entry_function_known_type_t determine_function_type(transaction_t *tx) {
     }
 
     if (tx->payload.entry_function.module_id.address[ADDRESS_LEN - 1] == 0x01 &&
-        memcmp(tx->payload.entry_function.module_id.name.bytes, "aptos_account", 13) == 0 &&
-        memcmp(tx->payload.entry_function.function_name.bytes, "transfer", 8) == 0) {
+        bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "aptos_account", 13) &&
+        bcs_cmp_bytes(&tx->payload.entry_function.function_name, "transfer", 8)) {
         return FUNC_APTOS_ACCOUNT_TRANSFER;
     }
 
     if (tx->payload.entry_function.module_id.address[ADDRESS_LEN - 1] == 0x01 &&
-        memcmp(tx->payload.entry_function.module_id.name.bytes, "coin", 4) == 0 &&
-        memcmp(tx->payload.entry_function.function_name.bytes, "transfer", 8) == 0) {
+        bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "coin", 4) &&
+        bcs_cmp_bytes(&tx->payload.entry_function.function_name, "transfer", 8)) {
         return FUNC_COIN_TRANSFER;
     }
 

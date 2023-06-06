@@ -25,7 +25,7 @@ jobs:
             artifact: aptos-app-nanosp
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder
 
     steps:
       - name: Clone
@@ -46,7 +46,7 @@ jobs:
     name: Clang Static Analyzer
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder
 
     steps:
       - name: Clone
@@ -68,7 +68,7 @@ jobs:
     name: Unit test
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder
 
     steps:
       - name: Install curl
@@ -94,7 +94,7 @@ jobs:
           path: unit-tests/coverage
 
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v3
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./unit-tests/coverage.info
@@ -108,7 +108,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder:latest
+      image: ghcr.io/ledgerhq/ledger-app-builder/ledger-app-builder
 
     steps:
       - name: Clone
@@ -128,17 +128,14 @@ jobs:
       matrix:
         include:
           - model: nanos
-            SDK: "2.1"
           - model: nanox
-            SDK: "2.0.2"
           - model: nanosp
-            SDK: "1.0.3"
     needs:
       - nano_build
     runs-on: ubuntu-latest
 
     container:
-      image: ghcr.io/ledgerhq/speculos:latest
+      image: ghcr.io/ledgerhq/speculos:sha-45cb9a6
       options: --entrypoint /bin/bash
       ports:
         - 9999:9999
@@ -159,7 +156,7 @@ jobs:
           pip install -r tests/ledgercomm/requirements.txt
       - name: Run test
         run: |
-          nohup bash -c "python /speculos/speculos.py bin/app.elf --apdu-port 9999 --button-port 42000 --automation-port 43000 --display headless --model=${{ matrix.model }} --sdk=${{ matrix.SDK }}" > speculos.log 2<&1 &
+          nohup bash -c "python /speculos/speculos.py bin/app.elf --apdu-port 9999 --button-port 42000 --automation-port 43000 --display headless --model=${{ matrix.model }}" > speculos.log 2<&1 &
           until `nc -w5 -z -v 127.0.0.1 9999`; do sleep 1; done;
           pytest --headless tests/ledgercomm/  --model=${{ matrix.model }}
 
@@ -176,11 +173,8 @@ jobs:
       matrix:
         include:
           - model: nanos
-            SDK: "2.1"
           - model: nanox
-            SDK: "2.0.2"
           - model: nanosp
-            SDK: "1.0.3"
     needs:
       - nano_build
     runs-on: ubuntu-latest
@@ -195,9 +189,9 @@ jobs:
           path: bin
       - name: Install tests dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y qemu-user-static
+          sudo apt-get update && sudo apt-get install -y qemu-user-static tesseract-ocr
           pip install --extra-index-url https://test.pypi.org/simple/ -r tests/speculos/requirements.txt
       - name: Run test
         env:
           CTEST_OUTPUT_ON_FAILURE: 1
-        run: pytest tests/speculos/ --model=${{ matrix.model }} --sdk=${{ matrix.SDK }}
+        run: pytest tests/speculos/ --model=${{ matrix.model }}

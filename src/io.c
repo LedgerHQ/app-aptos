@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Ledger App Boilerplate.
+ *   Ledger App Aptos.
  *   (c) 2020 Ledger SAS.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ uint8_t io_event(uint8_t channel __attribute__((unused))) {
                   SEPROXYHAL_TAG_STATUS_EVENT_FLAG_USB_POWERED)) {
                 THROW(EXCEPTION_IO_RESET);
             }
-            /* fallthrough */
+            __attribute__((fallthrough));
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
             UX_DISPLAYED_EVENT({});
             break;

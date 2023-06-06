@@ -1,5 +1,5 @@
 # ****************************************************************************
-#    Ledger App Boilerplate
+#    Ledger App Aptos
 #    (c) 2020 Ledger SAS.
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,17 +23,17 @@ include $(BOLOS_SDK)/Makefile.defines
 
 APP_LOAD_PARAMS  = --curve ed25519
 ifeq ($(TARGET_NAME), TARGET_NANOX)
-APP_LOAD_PARAMS=--appFlags 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
+APP_LOAD_PARAMS += --appFlags 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
 else
-APP_LOAD_PARAMS=--appFlags 0x000
+APP_LOAD_PARAMS += --appFlags 0x000
 endif
 APP_LOAD_PARAMS += --path "44'/637'"
 APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
 
 APPNAME      = "Aptos"
 APPVERSION_M = 0
-APPVERSION_N = 0
-APPVERSION_P = 1
+APPVERSION_N = 4
+APPVERSION_P = 17
 APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 ifeq ($(TARGET_NAME),TARGET_NANOS)
@@ -56,6 +56,16 @@ DEFINES += BLE_SEGMENT_SIZE=32
 DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
 DEFINES += UNUSED\(x\)=\(void\)x
 
+ifeq ($(TARGET_NAME),TARGET_NANOS)
+    DEFINES += MAX_TRANSACTION_PACKETS=6
+endif
+ifeq ($(TARGET_NAME),TARGET_NANOS2)
+    DEFINES += MAX_TRANSACTION_PACKETS=106
+endif
+ifeq ($(TARGET_NAME),TARGET_NANOX)
+    DEFINES += MAX_TRANSACTION_PACKETS=90
+endif
+
 ifeq ($(TARGET_NAME),TARGET_NANOX)
     DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
 endif
@@ -72,7 +82,7 @@ else
     DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
 endif
 
-DEBUG = 1
+DEBUG ?= 0
 ifneq ($(DEBUG),0)
     DEFINES += HAVE_PRINTF
     ifeq ($(TARGET_NAME),TARGET_NANOS)
@@ -128,4 +138,4 @@ include $(BOLOS_SDK)/Makefile.rules
 dep/%.d: %.c Makefile
 
 listvariants:
-	@echo VARIANTS COIN BOL
+	@echo VARIANTS COIN APTOS

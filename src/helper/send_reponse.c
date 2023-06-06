@@ -1,5 +1,5 @@
 /*****************************************************************************
- *   Ledger App Boilerplate.
+ *   Ledger App Aptos.
  *   (c) 2020 Ledger SAS.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -41,7 +41,7 @@ int helper_send_response_pubkey() {
 }
 
 int helper_send_response_sig() {
-    uint8_t resp[1 + MAX_DER_SIG_LEN] = {0};
+    uint8_t resp[1 + SIGNATURE_LEN] = {0};
     size_t offset = 0;
 
     resp[offset++] = G_context.tx_info.signature_len;
