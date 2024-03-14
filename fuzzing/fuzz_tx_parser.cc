@@ -5,12 +5,14 @@
 
 extern "C" {
 #include "bcs/init.h"
-#include "common/buffer.h"
-#include "common/format.h"
+#include "buffer.h"
+#include "format.h"
 #include "transaction/deserialize.h"
 #include "transaction/utils.h"
 #include "transaction/types.h"
 }
+
+#define DEBUG 0
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     buffer_t buf = {.ptr = data, .size = size, .offset = 0};
@@ -21,7 +23,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size) {
     transaction_init(&tx);
     status = transaction_deserialize(&buf, &tx);
 
-    if (status == PARSING_OK && tx.tx_variant == TX_RAW &&
+    if (DEBUG && status == PARSING_OK && tx.tx_variant == TX_RAW &&
         tx.payload_variant == PAYLOAD_ENTRY_FUNCTION) {
         printf("\nTransaction size: %lu\n", size);
         printf("chain_id: %d\n", tx.chain_id);

@@ -17,29 +17,27 @@
 
 #include <stdbool.h>  // bool
 
+#include "io.h"
+
 #include "validate.h"
-#include "../menu.h"
 #include "../../sw.h"
-#include "../../io.h"
 #include "../../crypto.h"
 #include "../../globals.h"
 #include "../../helper/send_response.h"
 
-void ui_action_validate_pubkey(bool choice) {
+void validate_pubkey(bool choice) {
     if (choice) {
         helper_send_response_pubkey();
     } else {
         io_send_sw(SW_DENY);
     }
-
-    ui_menu_main();
 }
 
-void ui_action_validate_transaction(bool choice) {
+void validate_transaction(bool choice) {
     if (choice) {
         G_context.state = STATE_APPROVED;
 
-        if (crypto_sign_message() != 0) {
+        if (crypto_sign_message() != CX_OK) {
             G_context.state = STATE_NONE;
             io_send_sw(SW_SIGNATURE_FAIL);
         } else {
@@ -49,6 +47,4 @@ void ui_action_validate_transaction(bool choice) {
         G_context.state = STATE_NONE;
         io_send_sw(SW_DENY);
     }
-
-    ui_menu_main();
 }

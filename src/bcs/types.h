@@ -78,7 +78,8 @@ typedef struct {
 typedef enum {
     FUNC_UNKNOWN = 0,
     FUNC_APTOS_ACCOUNT_TRANSFER = 1,
-    FUNC_COIN_TRANSFER = 2
+    FUNC_COIN_TRANSFER = 2,
+    FUNC_APTOS_ACCOUNT_TRANSFER_COINS = 3,
 } entry_function_known_type_t;
 
 typedef struct {
@@ -120,11 +121,18 @@ typedef struct {
     fixed_bytes_t *args;
 } script_payload_t;
 
-typedef enum { TX_RAW = 0, TX_RAW_WITH_DATA = 1, TX_MESSAGE = 2, TX_UNDEFINED = 1000 } tx_variant_t;
+typedef enum {
+    TX_RAW = 0,
+    TX_RAW_WITH_DATA = 1,
+    TX_MESSAGE = 2,
+    TX_RAW_MESSAGE = 3,
+    TX_UNDEFINED = 1000
+} tx_variant_t;
 
 typedef enum {
     PAYLOAD_SCRIPT = 0,
     PAYLOAD_ENTRY_FUNCTION = 2,
+    PAYLOAD_MULTISIG = 3,
     PAYLOAD_UNDEFINED = 1000
 } payload_variant_t;
 

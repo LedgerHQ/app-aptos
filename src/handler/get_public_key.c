@@ -22,14 +22,15 @@
 
 #include "os.h"
 #include "cx.h"
+#include "io.h"
+#include "buffer.h"
 
 #include "get_public_key.h"
 #include "../globals.h"
 #include "../types.h"
-#include "../io.h"
 #include "../sw.h"
 #include "../crypto.h"
-#include "../common/buffer.h"
+#include "../address.h"
 #include "../ui/display.h"
 #include "../helper/send_response.h"
 
@@ -46,19 +47,32 @@ int handler_get_public_key(buffer_t *cdata, bool display) {
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
 
-    // derive private key according to BIP32 path
-    int error = crypto_derive_private_key(&private_key,
-                                          G_context.pk_info.chain_code,
-                                          G_context.bip32_path,
-                                          G_context.bip32_path_len);
-    if (error != 0) {
-        explicit_bzero(&private_key, sizeof(private_key));
-        PRINTF("Error code: %x.\n", error);
+    if (!validate_aptos_bip32_path(G_context.bip32_path, G_context.bip32_path_len)) {
         G_context.req_type = REQUEST_UNDEFINED;
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
+
+    // derive private key according to BIP32 path
+    cx_err_t error = crypto_derive_private_key(&private_key,
+                                               G_context.pk_info.chain_code,
+                                               G_context.bip32_path,
+                                               G_context.bip32_path_len);
+    if (error != CX_OK) {
+        explicit_bzero(&private_key, sizeof(private_key));
+        PRINTF("crypto_derive_private_key error code: %x.\n", error);
+        G_context.req_type = REQUEST_UNDEFINED;
+        return io_send_sw(SW_GET_PUB_KEY_FAIL);
+    }
+
     // generate corresponding public key
-    crypto_init_public_key(&private_key, &public_key, G_context.pk_info.raw_public_key);
+    error = crypto_init_public_key(&private_key, &public_key, G_context.pk_info.raw_public_key);
+
+    if (error != CX_OK) {
+        explicit_bzero(&private_key, sizeof(private_key));
+        PRINTF("crypto_init_public_key error code: %x.\n", error);
+        G_context.req_type = REQUEST_UNDEFINED;
+        return io_send_sw(SW_GET_PUB_KEY_FAIL);
+    }
 
     // reset private key
     explicit_bzero(&private_key, sizeof(private_key));

@@ -1,9 +1,11 @@
 #include <string.h>
+
+#include "buffer.h"
+
 #include "deserialize.h"
 #include "utils.h"
 #include "types.h"
 #include "../constants.h"
-#include "../common/buffer.h"
 #include "../bcs/init.h"
 #include "../bcs/decoder.h"
 
@@ -22,6 +24,10 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
         case TX_RAW:
             return tx_raw_deserialize(buf, tx);
         case TX_RAW_WITH_DATA:
+            break;
+        case TX_RAW_MESSAGE:
+            break;  // Since the raw message is processed before display without direct transaction
+                    // buffer reads, null-termination concerns are mitigated.
         case TX_MESSAGE:
             // To make sure the message is a null-terminated string
             if (buf->size == MAX_TRANSACTION_LEN && buf->ptr[MAX_TRANSACTION_LEN - 1] != 0) {
@@ -74,7 +80,8 @@ parser_status_e tx_raw_deserialize(buffer_t *buf, transaction_t *tx) {
     if (!bcs_read_u32_from_uleb128(buf, &payload_variant)) {
         return PAYLOAD_VARIANT_READ_ERROR;
     }
-    if (payload_variant != PAYLOAD_ENTRY_FUNCTION && payload_variant != PAYLOAD_SCRIPT) {
+    if (payload_variant != PAYLOAD_ENTRY_FUNCTION && payload_variant != PAYLOAD_SCRIPT &&
+        payload_variant != PAYLOAD_MULTISIG) {
         return PAYLOAD_UNDEFINED_ERROR;
     }
     tx->payload_variant = payload_variant;
@@ -93,6 +100,9 @@ parser_status_e tx_raw_deserialize(buffer_t *buf, transaction_t *tx) {
         case PAYLOAD_SCRIPT:
             // TODO: implement script fields parsing
             return PARSING_OK;
+        case PAYLOAD_MULTISIG:
+            // TODO: implement multisig fields parsing
+            return PARSING_OK;
         default:
             return PAYLOAD_UNDEFINED_ERROR;
     }
@@ -101,7 +111,6 @@ parser_status_e tx_raw_deserialize(buffer_t *buf, transaction_t *tx) {
 }
 
 parser_status_e tx_variant_deserialize(buffer_t *buf, transaction_t *tx) {
-    parser_status_e status = TX_VARIANT_UNDEFINED_ERROR;
     if (buf->offset != 0) {
         return TX_VARIANT_READ_ERROR;
     }
@@ -120,17 +129,16 @@ parser_status_e tx_variant_deserialize(buffer_t *buf, transaction_t *tx) {
             tx->tx_variant = TX_RAW;
             return PARSING_OK;
         }
-    } else {
-        status = HASHED_PREFIX_READ_ERROR;
     }
 
-    if (transaction_utils_check_encoding(buf->ptr, buf->size)) {
-        buf->offset = 0;
-        tx->tx_variant = TX_MESSAGE;
-        return PARSING_OK;
-    }
+    // Not a transaction prefix, so we reset the offer to consider the full message
+    buf->offset = 0;
 
-    return status;
+    // Try to display the message as UTF8 if possible
+    tx->tx_variant =
+        transaction_utils_check_encoding(buf->ptr, buf->size) ? TX_MESSAGE : TX_RAW_MESSAGE;
+
+    return PARSING_OK;
 }
 
 parser_status_e entry_function_payload_deserialize(buffer_t *buf, transaction_t *tx) {
@@ -172,6 +180,7 @@ parser_status_e entry_function_payload_deserialize(buffer_t *buf, transaction_t 
         case FUNC_APTOS_ACCOUNT_TRANSFER:
             return aptos_account_transfer_function_deserialize(buf, tx);
         case FUNC_COIN_TRANSFER:
+        case FUNC_APTOS_ACCOUNT_TRANSFER_COINS:
             return coin_transfer_function_deserialize(buf, tx);
         default:
             return PARSING_OK;
@@ -236,7 +245,8 @@ parser_status_e coin_transfer_function_deserialize(buffer_t *buf, transaction_t 
         return PAYLOAD_UNDEFINED_ERROR;
     }
     entry_function_payload_t *payload = &tx->payload.entry_function;
-    if (payload->known_type != FUNC_COIN_TRANSFER) {
+    if (payload->known_type != FUNC_COIN_TRANSFER &&
+        payload->known_type != FUNC_APTOS_ACCOUNT_TRANSFER_COINS) {
         return PAYLOAD_UNDEFINED_ERROR;
     }
 
@@ -245,7 +255,7 @@ parser_status_e coin_transfer_function_deserialize(buffer_t *buf, transaction_t 
         return TYPE_ARGS_SIZE_READ_ERROR;
     }
     if (payload->args.ty_size != 1) {
-        return -TYPE_ARGS_SIZE_UNEXPECTED_ERROR;
+        return TYPE_ARGS_SIZE_UNEXPECTED_ERROR;
     }
 
     uint32_t ty_arg_variant = TYPE_TAG_UNDEFINED;
@@ -340,6 +350,12 @@ entry_function_known_type_t determine_function_type(transaction_t *tx) {
         bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "coin", 4) &&
         bcs_cmp_bytes(&tx->payload.entry_function.function_name, "transfer", 8)) {
         return FUNC_COIN_TRANSFER;
+    }
+
+    if (tx->payload.entry_function.module_id.address[ADDRESS_LEN - 1] == 0x01 &&
+        bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "aptos_account", 13) &&
+        bcs_cmp_bytes(&tx->payload.entry_function.function_name, "transfer_coins", 14)) {
+        return FUNC_APTOS_ACCOUNT_TRANSFER_COINS;
     }
 
     return FUNC_UNKNOWN;

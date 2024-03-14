@@ -22,13 +22,14 @@
 
 #include "os.h"
 #include "cx.h"
+#include "buffer.h"
 
 #include "sign_tx.h"
 #include "../sw.h"
 #include "../globals.h"
 #include "../crypto.h"
+#include "../address.h"
 #include "../ui/display.h"
-#include "../common/buffer.h"
 #include "../transaction/types.h"
 #include "../transaction/deserialize.h"
 
@@ -48,6 +49,11 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
             // unable to recover from this error, reset the context
             G_context.req_type = REQUEST_UNDEFINED;
             return io_send_sw(SW_WRONG_DATA_LENGTH);
+        }
+
+        if (!validate_aptos_bip32_path(G_context.bip32_path, G_context.bip32_path_len)) {
+            G_context.req_type = REQUEST_UNDEFINED;
+            return io_send_sw(SW_GET_PUB_KEY_FAIL);
         }
 
         return io_send_sw(SW_OK);

@@ -79,7 +79,6 @@ int try_utf8_to_ascii(const uint8_t *in,
             return -1;
         }
     }
-    // out[out_len++] = '\0';
 
     if (out_is_utf8) {
         *out_is_utf8 = is_utf8;
