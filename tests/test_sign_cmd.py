@@ -27,7 +27,6 @@ def disable_blind_signing(firmware, backend, navigator):
             NavInsID.USE_CASE_HOME_SETTINGS,
             NavInsID.USE_CASE_SETTINGS_NEXT,
             NavIns(NavInsID.TOUCH, (200, 113)),
-            NavInsID.USE_CASE_CHOICE_REJECT,
             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT
         ]
         navigator.navigate(instructions, screen_change_before_first_instruction=False)
@@ -102,6 +101,56 @@ def test_blind_sign_tx_long_tx(firmware, backend, navigator, test_name, disable_
                                                       test_name + "/part1")
         else:
             navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
+                                                      [NavInsID.USE_CASE_CHOICE_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Enable blind signing",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part0",
+                                                      screen_change_after_last_instruction=False)
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
+                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part1")
+    response = client.get_async_response().data
+    _, sig, _ = unpack_sign_tx_response(response)
+    assert check_signature_validity(public_key, sig, transaction)
+
+# In this test we send to the device a transaction to sign and validate it on screen
+# The transaction will be sent in multiple chunks
+# Also, this transaction cannot be parsed by the device
+def test_blind_sign_tx_unparsed_tx(firmware, backend, navigator, test_name, disable_blind_signing):
+    # Use the app interface instead of raw interface
+    client = AptosCommandSender(backend)
+    path: str = "m/44'/637'/1'/0'/0'"
+
+    rapdu = client.get_public_key(path=path)
+    _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    transaction = bytes.fromhex("b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b193783135e8b00430253a22ba041d860c373d7a1501ccf7ac2d1ad37a8ed2775aee4b000000000000000200000000000000000000000000000000000000000000000000000000000000010d6170746f735f6163636f756e740e7472616e736665725f636f696e73010761d2c22a6cb7831bee0f48363b0eec92369357aece0d1142062f7d5d85c7bef8076c705f636f696e024c50030773eb84966be67e4697fc5ae75173ca6c35089e802650f75422ab49a8729704ec04636f696e06446f6f446f6f000700000000000000000000000000000000000000000000000000000000000000010a6170746f735f636f696e094170746f73436f696e00070163df34fccbf003ce219d3f1d9e70d140b60622cb9dd47599c25fb2f797ba6e066375727665730c556e636f7272656c61746564000220fdf3824962d2f803e009ac61cca29c822338da6c5f541a4e58898468152b11c60800e1f50500000000204e0000000000006400000000000000549927660000000002")
+
+    with client.sign_tx(path=path, transaction=transaction):
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Continue",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part0",
+                                                      screen_change_after_last_instruction=False)
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Allow",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part1",
+                                                      screen_change_after_last_instruction=False)
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part2")
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_CHOICE_CONFIRM,
                                                       [NavInsID.USE_CASE_CHOICE_CONFIRM,
                                                        NavInsID.USE_CASE_STATUS_DISMISS],
                                                       "Enable blind signing",

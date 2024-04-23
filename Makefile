@@ -47,8 +47,8 @@ APPNAME = "Aptos"
 
 # Application version
 APPVERSION_M = 0
-APPVERSION_N = 6
-APPVERSION_P = 9
+APPVERSION_N = 7
+APPVERSION_P = 0
 APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files

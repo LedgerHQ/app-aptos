@@ -36,12 +36,25 @@ static void confirm_transaction_rejection(void) {
     nbgl_useCaseStatus("Transaction rejected", false, ui_menu_main);
 }
 
-static void ask_transaction_rejection_confirmation(void) {
+static void confirm_unparsed_transaction_rejection(void) {
+    reject_unparsed_transaction();
+    nbgl_useCaseStatus("Transaction rejected", false, ui_menu_main);
+}
+
+static void ask_transaction_rejection(nbgl_callback_t callback) {
     nbgl_useCaseConfirm("Reject transaction?",
                         NULL,
                         "Yes, Reject",
                         "Go back to transaction",
-                        confirm_transaction_rejection);
+                        callback);
+}
+
+static void ask_transaction_rejection_confirmation(void) {
+    ask_transaction_rejection(confirm_transaction_rejection);
+}
+
+static void ask_unparsed_transaction_rejection_confirmation(void) {
+    ask_transaction_rejection(confirm_unparsed_transaction_rejection);
 }
 
 static void review_choice(bool confirm) {
@@ -50,6 +63,19 @@ static void review_choice(bool confirm) {
         nbgl_useCaseStatus("TRANSACTION\nSIGNED", true, ui_menu_main);
     } else {
         ask_transaction_rejection_confirmation();
+    }
+}
+
+static void review_unparsed_choice(bool confirm) {
+    if (confirm) {
+        nbgl_useCaseStaticReviewVerify(&C_aptos_logo_64px,
+                                       "Sign transaction",
+                                       "Hold to sign",
+                                       "Reject transaction",
+                                       review_choice,
+                                       ask_transaction_rejection_confirmation);
+    } else {
+        ask_unparsed_transaction_rejection_confirmation();
     }
 }
 
@@ -191,6 +217,21 @@ int ui_display_tx_coin_transfer() {
                                 "Reject transaction",
                                 review_tx_coin_transfer_continue,
                                 ask_transaction_rejection_confirmation);
+        return 0;
+    }
+
+    return ret;
+}
+
+int ui_display_unparsed_transaction() {
+    const int ret = ui_prepare_unparsed_transaction();
+    if (ret == UI_PREPARED) {
+        nbgl_useCaseChoice(&C_warning64px,
+                           "Transaction\ndetails unavailable",
+                           "Acknowledge the risks\nand proceed with caution.",
+                           "Continue",
+                           "Reject transaction",
+                           review_unparsed_choice);
         return 0;
     }
 

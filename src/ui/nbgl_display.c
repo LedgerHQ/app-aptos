@@ -38,12 +38,29 @@ nbgl_layoutTagValueList_t pairList;
 nbgl_pageInfoLongPress_t infoLongPress;
 
 static void blind_sign_continue() {
-    nbgl_useCaseReviewStart(blind_sign_ctx.icon,
-                            blind_sign_ctx.review_title,
-                            blind_sign_ctx.review_sub_title,
-                            blind_sign_ctx.reject_text,
-                            blind_sign_ctx.continue_callback,
-                            blind_sign_ctx.reject_callback);
+    if (blind_sign_ctx.continue_callback) {
+        nbgl_useCaseReviewStart(blind_sign_ctx.icon,
+                                blind_sign_ctx.review_title,
+                                blind_sign_ctx.review_sub_title,
+                                blind_sign_ctx.reject_text,
+                                blind_sign_ctx.continue_callback,
+                                blind_sign_ctx.reject_callback);
+    } else if (blind_sign_ctx.choice_callback) {
+        pairList.nbMaxLinesForValue = 0;
+        pairList.nbPairs = 0;
+        pairList.pairs = pairs;
+
+        infoLongPress.icon = &C_aptos_logo_64px;
+        infoLongPress.text = blind_sign_ctx.long_press_title;
+        infoLongPress.longPressText = blind_sign_ctx.long_press_button_text;
+
+        nbgl_useCaseStaticReview(&pairList,
+                                 &infoLongPress,
+                                 blind_sign_ctx.reject_text,
+                                 blind_sign_ctx.choice_callback);
+    } else {
+        PRINTF("Invalid blind signing context\n");
+    }
 }
 
 static void blind_sign_info() {
@@ -65,6 +82,19 @@ static void blind_sign_choice(bool enable) {
     }
 }
 
+static void blind_sign_init_choice() {
+    if (N_storage.settings.allow_blind_signing) {
+        blind_sign_info();
+    } else {
+        nbgl_useCaseChoice(&C_round_warning_64px,
+                           "Enable blind signing to\nauthorize this\noperation",
+                           NULL,
+                           "Enable blind signing",
+                           blind_sign_ctx.reject_text,
+                           blind_sign_choice);
+    }
+}
+
 void nbgl_useCaseReviewVerify(const nbgl_icon_details_t *icon,
                               const char *review_title,
                               const char *review_sub_title,
@@ -77,16 +107,26 @@ void nbgl_useCaseReviewVerify(const nbgl_icon_details_t *icon,
     blind_sign_ctx.reject_text = reject_text;
     blind_sign_ctx.continue_callback = continue_callback;
     blind_sign_ctx.reject_callback = reject_callback;
-    if (N_storage.settings.allow_blind_signing) {
-        blind_sign_info();
-    } else {
-        nbgl_useCaseChoice(&C_round_warning_64px,
-                           "Enable blind signing to\nauthorize this\noperation",
-                           NULL,
-                           "Enable blind signing",
-                           reject_text,
-                           blind_sign_choice);
-    }
+    blind_sign_ctx.choice_callback = NULL;
+
+    blind_sign_init_choice();
+}
+
+void nbgl_useCaseStaticReviewVerify(const nbgl_icon_details_t *icon,
+                                    const char *long_press_title,
+                                    const char *long_press_button_text,
+                                    const char *reject_text,
+                                    nbgl_choiceCallback_t choice_callback,
+                                    nbgl_callback_t reject_callback) {
+    blind_sign_ctx.icon = icon;
+    blind_sign_ctx.long_press_title = long_press_title;
+    blind_sign_ctx.long_press_button_text = long_press_button_text;
+    blind_sign_ctx.reject_text = reject_text;
+    blind_sign_ctx.continue_callback = NULL;
+    blind_sign_ctx.reject_callback = reject_callback;
+    blind_sign_ctx.choice_callback = choice_callback;
+
+    blind_sign_init_choice();
 }
 
 #endif

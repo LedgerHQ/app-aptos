@@ -22,9 +22,10 @@ typedef enum {
  * Enumeration with parsing state.
  */
 typedef enum {
-    STATE_NONE,     /// No state
-    STATE_PARSED,   /// Transaction data parsed
-    STATE_APPROVED  /// Transaction data approved
+    STATE_NONE,               /// No state
+    STATE_PARSED,             /// Transaction data parsed
+    STATE_CONTINUE_UNPARSED,  /// Transaction data parsed
+    STATE_APPROVED            /// Transaction data approved
 } state_e;
 
 /**

@@ -63,7 +63,8 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
             G_context.req_type = REQUEST_UNDEFINED;
             return io_send_sw(SW_BAD_STATE);
         }
-        if (G_context.state == STATE_PARSED || G_context.state == STATE_APPROVED) {
+        if (G_context.state == STATE_PARSED || G_context.state == STATE_APPROVED ||
+            G_context.state == STATE_CONTINUE_UNPARSED) {
             // should not get here, double check, context should already be reset
             return io_send_sw(SW_BAD_STATE);
         }
@@ -96,15 +97,16 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
 
             parser_status_e status = transaction_deserialize(&buf, &G_context.tx_info.transaction);
             PRINTF("Parsing status: %d.\n", status);
-            if (status != PARSING_OK) {
-                // reset the context to prevent sending the "last" chunk multiple times
-                G_context.req_type = REQUEST_UNDEFINED;
-                return io_send_sw(SW_TX_PARSING_FAIL);
+
+            int ui_status = 0;
+            if (status == PARSING_OK) {
+                G_context.state = STATE_PARSED;
+                ui_status = ui_display_transaction();
+            } else {
+                G_context.state = STATE_CONTINUE_UNPARSED;
+                ui_status = ui_display_unparsed_transaction();
             }
 
-            G_context.state = STATE_PARSED;
-
-            int ui_status = ui_display_transaction();
             G_context.req_type = REQUEST_UNDEFINED;  // all the work is done, reset the context
             return ui_status;
         }

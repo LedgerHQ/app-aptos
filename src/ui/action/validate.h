@@ -19,3 +19,5 @@ void validate_pubkey(bool choice);
  *
  */
 void validate_transaction(bool choice);
+
+void reject_unparsed_transaction(void);

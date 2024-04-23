@@ -48,3 +48,8 @@ void validate_transaction(bool choice) {
         io_send_sw(SW_DENY);
     }
 }
+
+void reject_unparsed_transaction(void) {
+    G_context.state = STATE_NONE;
+    io_send_sw(SW_TX_PARSING_FAIL);
+}

@@ -79,6 +79,14 @@ UX_STEP_NOCB(ux_display_blind_sign_banner_step,
                  "enabled in Settings",
              });
 #endif
+// Step with continue button
+UX_STEP_CB(ux_display_continue_step,
+           pb,
+           (*g_validate_callback)(true),
+           {
+               &C_icon_validate_14,
+               "Continue",
+           });
 // Step with approve button
 UX_STEP_CB(ux_display_approve_step,
            pb,
@@ -170,6 +178,29 @@ int ui_display_address() {
     return ret;
 }
 
+#ifdef TARGET_NANOS
+UX_STEP_NOCB(ux_display_decode_fail_step,
+             bnnn_paging,
+             {
+                 .title = "Info",
+                 .text = "Unable to display transaction data",
+             });
+#else
+UX_STEP_NOCB(ux_display_decode_fail_step,
+             pnn,
+             {
+                 &C_icon_warning,
+                 "Unable to display",
+                 "transaction data",
+             });
+#endif
+UX_STEP_NOCB(ux_display_details_step,
+             pnn,
+             {
+                 &C_icon_eye,
+                 "Details",
+                 "Unavailable",
+             });
 // Step with icon and text
 UX_STEP_NOCB(ux_display_blind_warn_step,
              pnn,
@@ -257,6 +288,26 @@ UX_STEP_NOCB(ux_display_gas_fee_step,
                  .title = "Gas Fee",
                  .text = g_gas_fee,
              });
+
+// FLOW to display uparsed transaction information:
+// #1 screen : "Unable to display transaction data"
+// #2 screen : continue button
+// #3 screen : reject button
+UX_FLOW(ux_display_warn_uparsed_tx_flow,
+        &ux_display_decode_fail_step,
+        &ux_display_continue_step,
+        &ux_display_reject_step);
+
+// FLOW to display message that transaction details are unavailable:
+// #1 screen : warning icon + "Blind Signing"
+// #2 screen : eye icon + "Details Unavailable"
+// #3 screen : approve button
+// #4 screen : reject button
+UX_FLOW(ux_display_uparsed_tx_flow,
+        &ux_display_blind_warn_step,
+        &ux_display_details_step,
+        &ux_display_approve_step,
+        &ux_display_reject_step);
 
 // FLOW to display default transaction information:
 // #1 screen : warning icon + "Blind Signing"
@@ -365,6 +416,27 @@ UX_FLOW(ux_display_tx_coin_transfer_flow,
         &ux_display_gas_fee_step,
         &ux_display_approve_step,
         &ux_display_reject_step);
+
+static void ui_action_continue_unparsed_transaction(bool choice) {
+    if (choice) {
+        g_validate_callback = &ui_action_validate_transaction;
+        ui_flow_verified_display(ux_display_uparsed_tx_flow);
+    } else {
+        reject_unparsed_transaction();
+        ui_menu_main();
+    }
+}
+
+int ui_display_unparsed_transaction() {
+    const int ret = ui_prepare_unparsed_transaction();
+    if (ret == UI_PREPARED) {
+        g_validate_callback = &ui_action_continue_unparsed_transaction;
+        ui_flow_display(ux_display_warn_uparsed_tx_flow);
+        return 0;
+    }
+
+    return ret;
+}
 
 int ui_display_transaction() {
     g_validate_callback = &ui_action_validate_transaction;

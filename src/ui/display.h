@@ -28,6 +28,9 @@ int ui_prepare_address(void);
 int ui_display_transaction(void);
 int ui_prepare_transaction(void);
 
+int ui_display_unparsed_transaction(void);
+int ui_prepare_unparsed_transaction(void);
+
 int ui_display_message(void);
 int ui_display_raw_message(void);
 

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Blind signing: Implement the ability to sign transactions that cannot be decoded
+
 ## [0.6.9] - 2024-01-23
 
 ### Added

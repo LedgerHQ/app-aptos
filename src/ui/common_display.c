@@ -137,6 +137,15 @@ int ui_prepare_transaction() {
     return UI_PREPARED;
 }
 
+int ui_prepare_unparsed_transaction() {
+    if (G_context.req_type != CONFIRM_TRANSACTION || G_context.state != STATE_CONTINUE_UNPARSED) {
+        G_context.state = STATE_NONE;
+        return io_send_sw(SW_BAD_STATE);
+    }
+
+    return UI_PREPARED;
+}
+
 int ui_prepare_entry_function() {
     entry_function_payload_t *function = &G_context.tx_info.transaction.payload.entry_function;
     char function_module_id_address_hex[67] = {0};
