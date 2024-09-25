@@ -63,7 +63,7 @@ ICON_NANOS = icons/app_aptos_16px.gif
 ICON_NANOX = icons/app_aptos_14px.gif
 ICON_NANOSP = icons/app_aptos_14px.gif
 ICON_STAX = icons/app_aptos_32px.gif
-ICON_FLEX = icons/app_aptos_32px.gif
+ICON_FLEX = icons/app_aptos_40px.gif
 
 # Application allowed derivation curves
 CURVE_APP_LOAD_PARAMS = ed25519

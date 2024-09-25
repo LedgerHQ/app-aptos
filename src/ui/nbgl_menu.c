@@ -53,18 +53,18 @@ static const nbgl_contentInfoList_t g_infos_list = {
 
 static void settings_controls_callback(int token, uint8_t index, int page);
 
-static const nbgl_content_t g_setting_contents_list[] = {
-    {
-        .type = SWITCHES_LIST,
-        .content = {
-            .switchesList = {
-                .switches = g_switches,
-                .nbSwitches = ARRAYLEN(g_switches),
-            },
-        },
-        .contentActionCallback = settings_controls_callback,
-    }
-};
+static const nbgl_content_t g_setting_contents_list[] = {{
+    .type = SWITCHES_LIST,
+    .content =
+        {
+            .switchesList =
+                {
+                    .switches = g_switches,
+                    .nbSwitches = ARRAYLEN(g_switches),
+                },
+         },
+    .contentActionCallback = settings_controls_callback,
+}};
 
 static const nbgl_genericContents_t g_setting_contents = {
     .callbackCallNeeded = false,
@@ -72,7 +72,7 @@ static const nbgl_genericContents_t g_setting_contents = {
     .nbContents = 1,
 };
 
-static void settings_controls_callback(int token, uint8_t index, __attribute__ ((unused)) int page) {
+static void settings_controls_callback(int token, uint8_t index, __attribute__((unused)) int page) {
     switch (token) {
         case TOKEN_BLIND_SIGNING:
             if (index == 0 || index == 1) {
