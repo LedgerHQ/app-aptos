@@ -62,7 +62,7 @@ static const nbgl_content_t g_setting_contents_list[] = {{
                     .switches = g_switches,
                     .nbSwitches = ARRAYLEN(g_switches),
                 },
-         },
+        },
     .contentActionCallback = settings_controls_callback,
 }};
 
