@@ -46,6 +46,9 @@ jobs:
           name: code-coverage
           path: unit-tests/coverage
 
+      - name: Install codecov dependencies
+        run: apk add gpg
+
       - name: Upload to codecov.io
         uses: codecov/codecov-action@v4
         with:
