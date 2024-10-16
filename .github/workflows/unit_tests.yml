@@ -58,3 +58,4 @@ jobs:
           name: codecov-app-aptos
           fail_ci_if_error: true
           verbose: true
+          os: alpine
