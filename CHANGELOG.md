@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add support for Flex target.
+
+### Changed
+
+- Update according to the latest NBGL use cases and guidelines:
+  - `nbgl_useCaseHomeAndSettings`
+  - `nbgl_useCaseAddressReview`
+  - `nbgl_useCaseReview`
+  - `nbgl_useCaseReviewBlindSigning`
+
 ## [0.6.9] - 2024-01-23
 
 ### Added

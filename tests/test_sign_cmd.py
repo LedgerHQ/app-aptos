@@ -25,9 +25,7 @@ def disable_blind_signing(firmware, backend, navigator):
     else:
         instructions = [
             NavInsID.USE_CASE_HOME_SETTINGS,
-            NavInsID.USE_CASE_SETTINGS_NEXT,
             NavIns(NavInsID.TOUCH, (200, 113)),
-            NavInsID.USE_CASE_CHOICE_REJECT,
             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT
         ]
         navigator.navigate(instructions, screen_change_before_first_instruction=False)
@@ -61,7 +59,7 @@ def test_sign_tx_short_tx(firmware, backend, navigator, test_name):
                                                       ROOT_SCREENSHOT_PATH,
                                                       test_name)
         else:
-            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                       [NavInsID.USE_CASE_REVIEW_CONFIRM,
                                                        NavInsID.USE_CASE_STATUS_DISMISS],
                                                       "Hold to sign",
@@ -101,15 +99,18 @@ def test_blind_sign_tx_long_tx(firmware, backend, navigator, test_name, disable_
                                                       ROOT_SCREENSHOT_PATH,
                                                       test_name + "/part1")
         else:
-            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
-                                                      [NavInsID.USE_CASE_CHOICE_CONFIRM,
-                                                       NavInsID.USE_CASE_STATUS_DISMISS],
-                                                      "Enable blind signing",
-                                                      ROOT_SCREENSHOT_PATH,
-                                                      test_name + "/part0",
-                                                      screen_change_after_last_instruction=False)
-            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
-                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
+                                           test_name + "/part0",
+                                           [NavInsID.USE_CASE_CHOICE_CONFIRM,
+                                            NavInsID.USE_CASE_STATUS_DISMISS,
+                                            NavInsID.USE_CASE_CHOICE_REJECT,
+                                            NavInsID.INFO_HEADER_TAP,
+                                            NavInsID.NAVIGATION_HEADER_TAP],
+                                           screen_change_after_last_instruction=False)
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.INFO_HEADER_TAP,
+                                                       NavInsID.NAVIGATION_HEADER_TAP,
+                                                       NavInsID.USE_CASE_REVIEW_CONFIRM,
                                                        NavInsID.USE_CASE_STATUS_DISMISS],
                                                       "Hold to sign",
                                                       ROOT_SCREENSHOT_PATH,
@@ -142,7 +143,7 @@ def test_sign_tx_refused(firmware, backend, navigator, test_name):
         assert len(e.value.data) == 0
     else:
         for i in range(4):
-            instructions = [NavInsID.USE_CASE_REVIEW_TAP] * i
+            instructions = [NavInsID.USE_CASE_VIEW_DETAILS_NEXT] * i
             instructions += [NavInsID.USE_CASE_REVIEW_REJECT,
                              NavInsID.USE_CASE_CHOICE_CONFIRM,
                              NavInsID.USE_CASE_STATUS_DISMISS]
@@ -182,7 +183,7 @@ def test_sign_tx_short_msg(firmware, backend, navigator, test_name):
                                                       ROOT_SCREENSHOT_PATH,
                                                       test_name)
         else:
-            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                       [NavInsID.USE_CASE_REVIEW_CONFIRM,
                                                        NavInsID.USE_CASE_STATUS_DISMISS],
                                                       "Hold to sign",
@@ -221,7 +222,7 @@ def test_sign_short_raw_msg(firmware, backend, navigator, test_name):
                                                       ROOT_SCREENSHOT_PATH,
                                                       test_name)
         else:
-            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                       [NavInsID.USE_CASE_REVIEW_CONFIRM,
                                                        NavInsID.USE_CASE_STATUS_DISMISS],
                                                       "Hold to sign",
@@ -262,19 +263,22 @@ def test_sign_long_raw_msg(firmware, backend, navigator, test_name, disable_blin
                                                         ROOT_SCREENSHOT_PATH,
                                                         test_name + "/part1")
         else:
-            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
-                                                        [NavInsID.USE_CASE_CHOICE_CONFIRM,
-                                                        NavInsID.USE_CASE_STATUS_DISMISS],
-                                                        "Enable blind signing",
-                                                        ROOT_SCREENSHOT_PATH,
-                                                        test_name + "/part0",
-                                                        screen_change_after_last_instruction=False)
-            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
-                                                        [NavInsID.USE_CASE_REVIEW_CONFIRM,
-                                                        NavInsID.USE_CASE_STATUS_DISMISS],
-                                                        "Hold to sign",
-                                                        ROOT_SCREENSHOT_PATH,
-                                                        test_name + "/part1")
+            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
+                                           test_name + "/part0",
+                                           [NavInsID.USE_CASE_CHOICE_CONFIRM,
+                                            NavInsID.USE_CASE_STATUS_DISMISS,
+                                            NavInsID.USE_CASE_CHOICE_REJECT,
+                                            NavInsID.INFO_HEADER_TAP,
+                                            NavInsID.NAVIGATION_HEADER_TAP],
+                                           screen_change_after_last_instruction=False)
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.INFO_HEADER_TAP,
+                                                       NavInsID.NAVIGATION_HEADER_TAP,
+                                                       NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part1")
 
     # The device as yielded the result, parse it and ensure that the signature is correct
     response = client.get_async_response().data

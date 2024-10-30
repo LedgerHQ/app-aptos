@@ -13,12 +13,14 @@ def test_app_mainmenu(firmware, navigator, test_name):
             NavInsID.RIGHT_CLICK
         ]
     else:
+        num_info_pages = 2 if firmware.device == "flex" else 1
+
         instructions = [
             NavInsID.USE_CASE_HOME_SETTINGS,
-            NavInsID.USE_CASE_SETTINGS_NEXT,
             NavIns(NavInsID.TOUCH, (200, 113)),
             NavIns(NavInsID.TOUCH, (200, 113)),
-            NavInsID.USE_CASE_CHOICE_REJECT,
+            *([NavInsID.USE_CASE_SETTINGS_NEXT] * num_info_pages),
+            NavInsID.USE_CASE_SETTINGS_PREVIOUS,
             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT
         ]
     navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH, test_name, instructions,
