@@ -46,8 +46,11 @@ jobs:
           name: code-coverage
           path: unit-tests/coverage
 
+      - name: Install codecov dependencies
+        run: apk add gpg gpg-agent
+
       - name: Upload to codecov.io
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./unit-tests/coverage.info
@@ -55,3 +58,4 @@ jobs:
           name: codecov-app-aptos
           fail_ci_if_error: true
           verbose: true
+          os: alpine
