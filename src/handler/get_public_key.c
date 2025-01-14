@@ -34,21 +34,17 @@
 #include "../ui/display.h"
 #include "../helper/send_response.h"
 
-int handler_get_public_key(buffer_t *cdata, bool display) {
-    explicit_bzero(&G_context, sizeof(G_context));
-    G_context.req_type = CONFIRM_ADDRESS;
-
+int get_public_key(buffer_t *cdata) {
     cx_ecfp_private_key_t private_key = {0};
     cx_ecfp_public_key_t public_key = {0};
 
+    explicit_bzero(&G_context, sizeof(G_context));
     if (!buffer_read_u8(cdata, &G_context.bip32_path_len) ||
         !buffer_read_bip32_path(cdata, G_context.bip32_path, (size_t) G_context.bip32_path_len)) {
-        G_context.req_type = REQUEST_UNDEFINED;
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
 
     if (!validate_aptos_bip32_path(G_context.bip32_path, G_context.bip32_path_len)) {
-        G_context.req_type = REQUEST_UNDEFINED;
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
 
@@ -60,7 +56,8 @@ int handler_get_public_key(buffer_t *cdata, bool display) {
     if (error != CX_OK) {
         explicit_bzero(&private_key, sizeof(private_key));
         PRINTF("crypto_derive_private_key error code: %x.\n", error);
-        G_context.req_type = REQUEST_UNDEFINED;
+        // reset private key
+        explicit_bzero(&private_key, sizeof(private_key));
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
 
@@ -70,19 +67,31 @@ int handler_get_public_key(buffer_t *cdata, bool display) {
     if (error != CX_OK) {
         explicit_bzero(&private_key, sizeof(private_key));
         PRINTF("crypto_init_public_key error code: %x.\n", error);
-        G_context.req_type = REQUEST_UNDEFINED;
+        // reset private key
+        explicit_bzero(&private_key, sizeof(private_key));
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
-
     // reset private key
     explicit_bzero(&private_key, sizeof(private_key));
+    return 0;
+}
 
-    if (display) {
-        int ui_status = ui_display_address();
-        G_context.req_type = REQUEST_UNDEFINED;  // all the work is done, reset the context
-        return ui_status;
+
+int handler_get_public_key(buffer_t *cdata, bool display) {
+    G_context.req_type = CONFIRM_ADDRESS;
+
+    int result = get_public_key(cdata);
+
+    // All the work has been done, so set the context to undefined.
+    // NOTE: not sure if ui_display_address() should be taken into account for the G_context reset.
+    G_context.req_type = REQUEST_UNDEFINED;
+    if (result != 0) {
+        return io_send_sw(result);
     }
 
-    G_context.req_type = REQUEST_UNDEFINED;  // all the work is done, reset the context
+    if (display) {
+        return ui_display_address();
+    }
+
     return helper_send_response_pubkey();
 }

@@ -1,5 +1,6 @@
 #ifdef HAVE_SWAP
 #include "swap.h"
+#include "get_public_key.h"
 
 #define ADDRESS_LENGTH 32
 
@@ -28,6 +29,11 @@ void swap_handle_check_address(check_address_parameters_t *params) {
     }
 
     // Check that the address to check is in the list of addresses in the device
+    if (get_public_key() != 0) {
+        PRINTF("get_public_key failed\n");
+        return;
+    }
+
 
     PRINTF("addess_to_check mathces within the addresses in the device\n");
     params->result = 1;
