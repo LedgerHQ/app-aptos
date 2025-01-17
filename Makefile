@@ -81,7 +81,11 @@ VARIANT_PARAM = COIN
 VARIANT_VALUES = APTOS
 
 # Enabling DEBUG flag will enable PRINTF and disable optimizations
-#DEBUG = 1
+DEBUG = 1
+TEST_PUBLIC_KEY = 1
+TESTING = 1 
+
+ENABLE_SWAP = 1
 
 ########################################
 #     Application custom permissions   #

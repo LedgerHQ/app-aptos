@@ -24,3 +24,5 @@
  *
  */
 int handler_get_public_key(buffer_t *cdata, bool display);
+
+int get_public_key(buffer_t *cdata);

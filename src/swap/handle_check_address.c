@@ -1,6 +1,8 @@
 #ifdef HAVE_SWAP
+#include <string.h>
 #include "swap.h"
-#include "get_public_key.h"
+#include "../handler/get_public_key.h"
+#include "os.h"
 
 #define ADDRESS_LENGTH 32
 
@@ -15,27 +17,30 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         return;
     }
 
-    PRINTF("address_parameters: %.*H", params->address_parameters_length, params->address_parameters);
+    PRINTF("address_parameters: %.*H\n", params->address_parameters_length, params->address_parameters);
 
     if (params->address_to_check == NULL) {
         PRINTF("address_to_check is empty\n");
         return;
     }
 
-    PRINTF("address_to_check: %s", params->address_to_check);
+    PRINTF("address_to_check: %s\n", params->address_to_check);
     if (strlen(params->address_to_check) != ADDRESS_LENGTH) {
-        PRINTF("address_to_check length should be %d, not", ADDRESS_LENGTH, strlen(params->address_to_check));
+        PRINTF("address_to_check length should be %d, not %d\n", ADDRESS_LENGTH, strlen(params->address_to_check));
         return;
     }
 
     // Check that the address to check is in the list of addresses in the device
-    if (get_public_key() != 0) {
+    buffer_t cdata;
+    cdata.ptr = params->address_parameters;
+    cdata.size = params->address_parameters_length;
+    if (get_public_key(&cdata) != 0) {
         PRINTF("get_public_key failed\n");
         return;
     }
 
 
-    PRINTF("addess_to_check mathces within the addresses in the device\n");
+    PRINTF("addess_to_check matches within the addresses in the device\n");
     params->result = 1;
 }
 
