@@ -34,25 +34,30 @@
 #include "../ui/display.h"
 #include "../helper/send_response.h"
 
-int get_public_key(buffer_t *cdata) {
+int get_public_key(buffer_t *cdata, uint8_t *output_bip32_path_len, uint32_t output_bip32_path[MAX_BIP32_PATH]) {
     cx_ecfp_private_key_t private_key = {0};
     cx_ecfp_public_key_t public_key = {0};
-
+    PRINTF("Inside get_public_key\n");
     explicit_bzero(&G_context, sizeof(G_context));
-    if (!buffer_read_u8(cdata, &G_context.bip32_path_len) ||
-        !buffer_read_bip32_path(cdata, G_context.bip32_path, (size_t) G_context.bip32_path_len)) {
+    if (!buffer_read_u8(cdata, output_bip32_path_len)){
+        PRINTF("COULDN'T READ LENGTH\n");
+        return io_send_sw(SW_WRONG_DATA_LENGTH);
+    }
+    if (!buffer_read_bip32_path(cdata, output_bip32_path, (size_t) *output_bip32_path_len)) {
+        PRINTF("WRONG LENGTH %d\n", (size_t) *output_bip32_path_len);
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
 
-    if (!validate_aptos_bip32_path(G_context.bip32_path, G_context.bip32_path_len)) {
+    if (!validate_aptos_bip32_path(output_bip32_path, output_bip32_path_len)) {
+        PRINTF("FAILED TO VALIDATE BIP32 PATH\n");    
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
 
     // derive private key according to BIP32 path
     cx_err_t error = crypto_derive_private_key(&private_key,
                                                G_context.pk_info.chain_code,
-                                               G_context.bip32_path,
-                                               G_context.bip32_path_len);
+                                               output_bip32_path,
+                                               output_bip32_path_len);
     if (error != CX_OK) {
         explicit_bzero(&private_key, sizeof(private_key));
         PRINTF("crypto_derive_private_key error code: %x.\n", error);
@@ -71,6 +76,7 @@ int get_public_key(buffer_t *cdata) {
         explicit_bzero(&private_key, sizeof(private_key));
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
+    PRINTF("PUBLIC KEY GENERATED");
     // reset private key
     explicit_bzero(&private_key, sizeof(private_key));
     return 0;
@@ -80,7 +86,7 @@ int get_public_key(buffer_t *cdata) {
 int handler_get_public_key(buffer_t *cdata, bool display) {
     G_context.req_type = CONFIRM_ADDRESS;
 
-    int result = get_public_key(cdata);
+    int result = get_public_key(cdata, &G_context.bip32_path_len, G_context.bip32_path);
 
     // All the work has been done, so set the context to undefined.
     // NOTE: not sure if ui_display_address() should be taken into account for the G_context reset.
