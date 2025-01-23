@@ -1,10 +1,28 @@
+/*****************************************************************************
+ *   Ledger App Aptos.
+ *   (c) 2020 Ledger SAS.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ *****************************************************************************/
+
 #ifdef HAVE_SWAP
 #include <string.h>
 #include "swap.h"
 #include "../handler/get_public_key.h"
 #include "os.h"
 
-#define ADDRESS_LENGTH 64
+// The address string lenght is 66, 2 characters for the prefix and 64 for the address
+#define ADDRESS_STRING_LENGTH 66
 
 /* Set params.result to 0 on error, 1 otherwise */
 void swap_handle_check_address(check_address_parameters_t *params) {
@@ -24,13 +42,13 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         return;
     }
 
-    PRINTF("address_to_check: %s\n", params->address_to_check);
-    //if (strlen(params->address_to_check) != ADDRESS_LENGTH) {
-    //    PRINTF("address_to_check length should be %d, not %d\n", ADDRESS_LENGTH, strlen(params->address_to_check));
-    //    return;
-    //}
+    if (strlen(params->address_to_check) != ADDRESS_STRING_LENGTH) {
+        PRINTF("address_to_check length should be %d, not %d\n",
+               ADDRESS_STRING_LENGTH, strlen(params->address_to_check));
+        return;
+    }
 
-    // Check that the address to check is in the list of addresses in the device
+    // Calculate the public key from the BIP32 path
     buffer_t cdata;
     cdata.ptr = params->address_parameters;
     cdata.size = params->address_parameters_length;
@@ -38,14 +56,29 @@ void swap_handle_check_address(check_address_parameters_t *params) {
 
     uint8_t bip32_path_len;
     uint32_t bip32_path[MAX_BIP32_PATH];
-    if (get_public_key(&cdata, &bip32_path_len, bip32_path) != 0) {
+    uint8_t public_key[32];
+    if (get_public_key(&cdata, &bip32_path_len, bip32_path, &public_key) != 0) {
         PRINTF("get_public_key failed\n");
         return;
     }
+    // Calculate the address from the public key, and decode it to readable format
+    uint8_t address[ADDRESS_LEN] = {0};
+    if (!address_from_pubkey(public_key, address, sizeof(address))) {
+        return;
+    }
+    char g_address[ADDRESS_STRING_LENGTH + 1];
+    if (0 > format_prefixed_hex(address, sizeof(address), g_address, sizeof(g_address))) {
+        return;
+    }
 
-
-    PRINTF("addess_to_check matches within the addresses in the device\n");
-    params->result = 1;
+    //PRINTF("address_to_check: %s\n", params->address_to_check);
+    //PRINTF("g_address: %s\n", g_address);
+    // Compare the strings
+    if (strcmp(params->address_to_check, g_address) != 0) {
+        PRINTF("address_to_check does not match the address in the device\n");
+        params->result = 1;
+    } else {
+        PRINTF("addess_to_check matches within the addresses in the device\n");
+    }
 }
-
 #endif
