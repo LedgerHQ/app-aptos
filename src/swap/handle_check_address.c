@@ -66,19 +66,19 @@ void swap_handle_check_address(check_address_parameters_t *params) {
     if (!address_from_pubkey(public_key, address, sizeof(address))) {
         return;
     }
-    char g_address[ADDRESS_STRING_LENGTH + 1];
-    if (0 > format_prefixed_hex(address, sizeof(address), g_address, sizeof(g_address))) {
+    char prefixed_address[ADDRESS_STRING_LENGTH + 1];
+    if (0 > format_prefixed_hex(address, sizeof(address), prefixed_address, sizeof(prefixed_address))) {
         return;
     }
 
-    //PRINTF("address_to_check: %s\n", params->address_to_check);
-    //PRINTF("g_address: %s\n", g_address);
+    PRINTF("address_to_check: %s\n", params->address_to_check);
+    PRINTF("prefixed_address: %s\n", prefixed_address);
     // Compare the strings
-    if (strcmp(params->address_to_check, g_address) != 0) {
-        PRINTF("address_to_check does not match the address in the device\n");
-        params->result = 1;
+    if (strcmp(params->address_to_check, prefixed_address) != 0) {
+        PRINTF("addresses does not match\n");
     } else {
-        PRINTF("addess_to_check matches within the addresses in the device\n");
+        PRINTF("addesses match\n");
+        params->result = 1;
     }
 }
 #endif
