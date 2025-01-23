@@ -38,7 +38,6 @@ int get_public_key(buffer_t *cdata, uint8_t *output_bip32_path_len, uint32_t out
     cx_ecfp_private_key_t private_key = {0};
     cx_ecfp_public_key_t public_key = {0};
     PRINTF("Inside get_public_key\n");
-    explicit_bzero(&G_context, sizeof(G_context));
     if (!buffer_read_u8(cdata, output_bip32_path_len)){
         PRINTF("COULDN'T READ LENGTH\n");
         return io_send_sw(SW_WRONG_DATA_LENGTH);
@@ -68,17 +67,14 @@ int get_public_key(buffer_t *cdata, uint8_t *output_bip32_path_len, uint32_t out
 
     // generate corresponding public key
     error = crypto_init_public_key(&private_key, &public_key, G_context.pk_info.raw_public_key);
+    // reset private key
+    explicit_bzero(&private_key, sizeof(private_key));
 
     if (error != CX_OK) {
-        explicit_bzero(&private_key, sizeof(private_key));
         PRINTF("crypto_init_public_key error code: %x.\n", error);
-        // reset private key
-        explicit_bzero(&private_key, sizeof(private_key));
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
     PRINTF("PUBLIC KEY GENERATED");
-    // reset private key
-    explicit_bzero(&private_key, sizeof(private_key));
     return 0;
 }
 
@@ -86,6 +82,7 @@ int get_public_key(buffer_t *cdata, uint8_t *output_bip32_path_len, uint32_t out
 int handler_get_public_key(buffer_t *cdata, bool display) {
     G_context.req_type = CONFIRM_ADDRESS;
 
+    explicit_bzero(&G_context, sizeof(G_context));
     int result = get_public_key(cdata, &G_context.bip32_path_len, G_context.bip32_path);
 
     // All the work has been done, so set the context to undefined.
