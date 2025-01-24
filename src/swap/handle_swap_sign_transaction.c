@@ -11,6 +11,7 @@
 
 bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
     PRINTF("TODO: swap_copy_transaction_parameters\n");
+    return false;
 }
 
 void __attribute__((noreturn)) swap_finalize_exchange_sign_transaction(bool is_success) {
