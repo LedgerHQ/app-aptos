@@ -24,7 +24,15 @@
 // The address string lenght is 66, 2 characters for the prefix and 64 for the address
 #define ADDRESS_STRING_LENGTH 66
 
-/* Set params.result to 0 on error, 1 otherwise */
+/**
+ * Handler for CHECK_ADDRESS command. If successfully parse BIP32 path,
+ * derive public key and address, and compare it with the address to check.
+ *
+ *
+ * @param[in,out] params
+ *   Command data address parameters and address to check.
+ *
+ */
 void swap_handle_check_address(check_address_parameters_t *params) {
     PRINTF("Inside Aptos swap_handle_check_address\n");
     params->result = 0;

@@ -70,8 +70,6 @@
 #include "../ui/display.h"
 #include "../helper/send_response.h"
 
-
-// Get public key from BIP32 path by deriving it from the private key.
 int get_public_key(buffer_t *cdata,
                     uint8_t *output_bip32_path_len,
                     uint32_t *output_bip32_path,
@@ -115,7 +113,6 @@ int get_public_key(buffer_t *cdata,
     return 0;
 }
 
-// Handler to get public key from BIP32 path, store in G_context and display on screen.
 int handler_get_public_key(buffer_t *cdata, bool display) {
     explicit_bzero(&G_context, sizeof(G_context));
     G_context.req_type = CONFIRM_ADDRESS;
