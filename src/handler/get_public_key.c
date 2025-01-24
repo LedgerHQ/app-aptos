@@ -73,7 +73,7 @@
 int get_public_key(buffer_t *cdata,
                     uint8_t *output_bip32_path_len,
                     uint32_t *output_bip32_path,
-                    uint8_t *output_public_key) {
+                    pubkey_ctx_t *output_pubkey_ctx) {
     if (!buffer_read_u8(cdata, output_bip32_path_len)) {
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
@@ -89,9 +89,8 @@ int get_public_key(buffer_t *cdata,
     // TODO(jmartins): review if chain code should come from G_context or needs to be specified
     // for the use (ie: SWAP or GET_PUBLIC_KEY)
     cx_ecfp_private_key_t private_key = {0};
-    uint32_t chaincode[32];
     cx_err_t error = crypto_derive_private_key(&private_key,
-                                               G_context.pk_info.chain_code,
+                                               output_pubkey_ctx->chain_code,
                                                output_bip32_path,
                                                *output_bip32_path_len);
     if (error != CX_OK) {
@@ -100,8 +99,8 @@ int get_public_key(buffer_t *cdata,
     }
 
     // generate corresponding public key
-    cx_ecfp_private_key_t public_key = {0};
-    error = crypto_init_public_key(&private_key, &public_key, output_public_key);
+    cx_ecfp_public_key_t public_key = {0};
+    error = crypto_init_public_key(&private_key, &public_key, output_pubkey_ctx->raw_public_key);
     // Wipe the private key from memory
     explicit_bzero(&private_key, sizeof(private_key));
 
@@ -122,7 +121,7 @@ int handler_get_public_key(buffer_t *cdata, bool display) {
     int err = get_public_key(cdata,
                             &G_context.bip32_path_len,
                             G_context.bip32_path,
-                            &G_context.pk_info.raw_public_key[0]);
+                            &G_context.pk_info);
 
     if (err) {
         G_context.req_type = REQUEST_UNDEFINED;

@@ -45,4 +45,4 @@ int handler_get_public_key(buffer_t *cdata, bool display);
 int get_public_key(buffer_t *cdata,
                     uint8_t *output_bip32_path_len,
                     uint32_t output_bip32_path[MAX_BIP32_PATH],
-                    uint8_t *output_public_key);
+                    pubkey_ctx_t *output_public_key);

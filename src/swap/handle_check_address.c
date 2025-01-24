@@ -18,8 +18,10 @@
 #ifdef HAVE_SWAP
 #include <string.h>
 #include "swap.h"
-#include "../handler/get_public_key.h"
 #include "os.h"
+#include "../address.h"
+#include "../handler/get_public_key.h"
+#include "../common/user_format.h"
 
 // The address string lenght is 66, 2 characters for the prefix and 64 for the address
 #define ADDRESS_STRING_LENGTH 66
@@ -64,14 +66,14 @@ void swap_handle_check_address(check_address_parameters_t *params) {
 
     uint8_t bip32_path_len;
     uint32_t bip32_path[MAX_BIP32_PATH];
-    uint8_t public_key[32];
+    pubkey_ctx_t public_key;
     if (get_public_key(&cdata, &bip32_path_len, bip32_path, &public_key) != 0) {
         PRINTF("get_public_key failed\n");
         return;
     }
     // Calculate the address from the public key, and decode it to readable format
     uint8_t address[ADDRESS_LEN] = {0};
-    if (!address_from_pubkey(public_key, address, sizeof(address))) {
+    if (!address_from_pubkey(public_key.raw_public_key, address, sizeof(address))) {
         return;
     }
     char prefixed_address[ADDRESS_STRING_LENGTH + 1];
