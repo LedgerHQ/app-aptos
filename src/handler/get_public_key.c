@@ -86,8 +86,6 @@ int get_public_key(buffer_t *cdata,
     }
 
     // derive private key according to BIP32 path
-    // TODO(jmartins): review if chain code should come from G_context or needs to be specified
-    // for the use (ie: SWAP or GET_PUBLIC_KEY)
     cx_ecfp_private_key_t private_key = {0};
     cx_err_t error = crypto_derive_private_key(&private_key,
                                                output_pubkey_ctx->chain_code,
