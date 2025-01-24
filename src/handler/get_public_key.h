@@ -26,9 +26,10 @@
 int handler_get_public_key(buffer_t *cdata, bool display);
 
 /**
- * Helper function for GET_PUBLIC_KEY and CHECK_ADDRESS command. If successfully parse BIP32 path,
- * derive public key/chain. The public key is stored in output_public_key, and the BIP32 path and 
- * its length are stored in output_bip32_path and output_bip32_path_len respectively.
+ * Helper function for GET_PUBLIC_KEY and CHECK_ADDRESS command. If successfully parse
+ * BIP32 path, derive public key/chain. The public key is stored in output_public_key,
+ * and the BIP32 path and its length are stored in output_bip32_path and 
+ * output_bip32_path_len respectively.
  *
  * @param[in] cdata
  *   Command data with BIP32 path.

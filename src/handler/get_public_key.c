@@ -85,7 +85,7 @@ int get_public_key(buffer_t *cdata,
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
 
-    // derive private key according to BIP32 path
+    // Derive private key according to BIP32 path
     cx_ecfp_private_key_t private_key = {0};
     cx_err_t error = crypto_derive_private_key(&private_key,
                                                output_pubkey_ctx->chain_code,
@@ -93,13 +93,15 @@ int get_public_key(buffer_t *cdata,
                                                *output_bip32_path_len);
     if (error != CX_OK) {
         PRINTF("crypto_derive_private_key error code: %x.\n", error);
+        // Wipe the private key from memory to protect against memory attacks
+        explicit_bzero(&private_key, sizeof(private_key));
         return io_send_sw(SW_GET_PUB_KEY_FAIL);
     }
 
-    // generate corresponding public key
+    // Generate corresponding public key
     cx_ecfp_public_key_t public_key = {0};
     error = crypto_init_public_key(&private_key, &public_key, output_pubkey_ctx->raw_public_key);
-    // Wipe the private key from memory
+     // Wipe the private key from memory to protect against memory attacks
     explicit_bzero(&private_key, sizeof(private_key));
 
     if (error != CX_OK) {

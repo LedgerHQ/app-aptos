@@ -23,7 +23,7 @@
 #include "../handler/get_public_key.h"
 #include "../common/user_format.h"
 
-// The address string lenght is 66, 2 characters for the prefix and 64 for the address
+// The address string length is 66, 2 characters for the prefix and 64 for the address
 #define ADDRESS_STRING_LENGTH 66
 
 /**
@@ -87,7 +87,7 @@ void swap_handle_check_address(check_address_parameters_t *params) {
     if (strcmp(params->address_to_check, prefixed_address) != 0) {
         PRINTF("addresses does not match\n");
     } else {
-        PRINTF("addesses match\n");
+        PRINTF("addresses match\n");
         params->result = 1;
     }
 }
