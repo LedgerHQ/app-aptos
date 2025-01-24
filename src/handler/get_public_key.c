@@ -114,8 +114,6 @@ int handler_get_public_key(buffer_t *cdata, bool display) {
     explicit_bzero(&G_context, sizeof(G_context));
     G_context.req_type = CONFIRM_ADDRESS;
 
-    cx_ecfp_public_key_t public_key = {0};
-
     int err = get_public_key(cdata,
                             &G_context.bip32_path_len,
                             G_context.bip32_path,
