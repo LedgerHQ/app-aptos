@@ -18,7 +18,7 @@
 #include <string.h>
 #include "parse.h"
 
-#define MAX_AMOUNT_STR_LEN 21 // 19 for u64 + 1 for '\0' +1 for '.'
+#define MAX_AMOUNT_STR_LEN 21  // 19 for u64 + 1 for '\0' +1 for '.'
 
 bool adjustDecimals(const char *src,
                     uint32_t srcLength,
@@ -36,11 +36,11 @@ bool adjustDecimals(const char *src,
         }
         target[offset++] = '0';
         target[offset++] = '.';
-        for (uint32_t i = 0; i < delta; i++) { 
+        for (uint32_t i = 0; i < delta; i++) {
             target[offset++] = '0';
         }
         startOffset = offset;
-        for (uint32_t i = 0; i < srcLength; i++) { 
+        for (uint32_t i = 0; i < srcLength; i++) {
             target[offset++] = src[i];
         }
         target[offset] = '\0';
@@ -50,14 +50,14 @@ bool adjustDecimals(const char *src,
         if (targetLength < srcLength + 1 + 1) {
             return false;
         }
-        while (offset < delta) { 
+        while (offset < delta) {
             target[offset++] = src[sourceOffset++];
         }
         if (decimals != 0) {
             target[offset++] = '.';
         }
         startOffset = offset;
-        while (sourceOffset < srcLength) { 
+        while (sourceOffset < srcLength) {
             target[offset++] = src[sourceOffset++];
         }
         target[offset] = '\0';
@@ -71,7 +71,7 @@ bool adjustDecimals(const char *src,
             lastZeroOffset = 0;
         }
     }
-    if (lastZeroOffset != 0) {        
+    if (lastZeroOffset != 0) {
         target[lastZeroOffset] = '\0';
         if (target[lastZeroOffset - 1] == '.') {
             target[lastZeroOffset - 1] = '\0';
@@ -80,24 +80,23 @@ bool adjustDecimals(const char *src,
     return true;
 }
 unsigned short print_amount(uint64_t amount, char *out, uint32_t outlen, uint8_t decimals) {
-    
     if (amount == 0) {
         if (outlen < 2) {
             return 0;
         }
         out[0] = '0';
-        out[1] = '\0';        
+        out[1] = '\0';
 
         return strlen(out);
     }
 
-    char tmp[MAX_AMOUNT_STR_LEN]; 
+    char tmp[MAX_AMOUNT_STR_LEN];
     char tmp2[MAX_AMOUNT_STR_LEN];
     uint32_t numDigits = 0, i;
     uint64_t base = 1;
 
-    while (base <= amount) { 
-        base *= 10;        
+    while (base <= amount) {
+        base *= 10;
         numDigits++;
     }
     if (numDigits > sizeof(tmp) - 2) {
@@ -110,10 +109,10 @@ unsigned short print_amount(uint64_t amount, char *out, uint32_t outlen, uint8_t
     }
     tmp[i] = '\0';
     out[0] = '\0';
-    if ( adjustDecimals(tmp, i, tmp2, MAX_AMOUNT_STR_LEN, decimals) ) {
+    if (adjustDecimals(tmp, i, tmp2, MAX_AMOUNT_STR_LEN, decimals)) {
         if (strlen(tmp2) < outlen - 1) {
             strlcpy(out, tmp2, outlen);
         }
-    }       
+    }
     return strlen(out);
 }

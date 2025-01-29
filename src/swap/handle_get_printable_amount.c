@@ -8,8 +8,7 @@
 
 /* Set empty printable_amount on error, printable amount otherwise */
 void swap_handle_get_printable_amount(get_printable_amount_parameters_t* params) {
-    
-    uint64_t amount;    
+    uint64_t amount;
     uint8_t decimals;
     char ticker[MAX_TICKER_LEN] = {0};
 
@@ -18,8 +17,8 @@ void swap_handle_get_printable_amount(get_printable_amount_parameters_t* params)
     // If the amount is a fee, its value is nominated in APT
     // If there is no coin_configuration, consider that we are doing a APT swap
     if (params->is_fee || params->coin_configuration == NULL) {
-        memcpy(ticker, "APT", sizeof("APT")); 
-        decimals = APT_DECIMAL_PRECISION; 
+        memcpy(ticker, "APT", sizeof("APT"));
+        decimals = APT_DECIMAL_PRECISION;
     } else {
         if (!swap_parse_config(params->coin_configuration,
                                params->coin_configuration_length,
