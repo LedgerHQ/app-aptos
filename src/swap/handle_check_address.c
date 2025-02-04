@@ -45,7 +45,9 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         return;
     }
     PRINTF("address_parameters_length: %d\n", params->address_parameters_length);
-    PRINTF("address_parameters: %.*H\n", params->address_parameters_length, params->address_parameters);
+    PRINTF("address_parameters: %.*H\n",
+           params->address_parameters_length,
+           params->address_parameters);
 
     if (params->address_to_check == NULL) {
         PRINTF("address_to_check is empty\n");
@@ -54,7 +56,8 @@ void swap_handle_check_address(check_address_parameters_t *params) {
 
     if (strlen(params->address_to_check) != ADDRESS_STRING_LENGTH) {
         PRINTF("address_to_check length should be %d, not %d\n",
-               ADDRESS_STRING_LENGTH, strlen(params->address_to_check));
+               ADDRESS_STRING_LENGTH,
+               strlen(params->address_to_check));
         return;
     }
 
@@ -77,7 +80,8 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         return;
     }
     char prefixed_address[ADDRESS_STRING_LENGTH + 1];
-    if (0 > format_prefixed_hex(address, sizeof(address), prefixed_address, sizeof(prefixed_address))) {
+    if (0 >
+        format_prefixed_hex(address, sizeof(address), prefixed_address, sizeof(prefixed_address))) {
         return;
     }
 

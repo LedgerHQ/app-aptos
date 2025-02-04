@@ -7,6 +7,8 @@
 
 #define MAX_TICKER_LEN 16
 
+#define MAX_TICKER_LEN 16
+
 /* Set empty printable_amount on error, printable amount otherwise */
 void swap_handle_get_printable_amount(get_printable_amount_parameters_t* params) {
     

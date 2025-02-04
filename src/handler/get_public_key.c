@@ -71,9 +71,9 @@
 #include "../helper/send_response.h"
 
 int get_public_key(buffer_t *cdata,
-                    uint8_t *output_bip32_path_len,
-                    uint32_t *output_bip32_path,
-                    pubkey_ctx_t *output_pubkey_ctx) {
+                   uint8_t *output_bip32_path_len,
+                   uint32_t *output_bip32_path,
+                   pubkey_ctx_t *output_pubkey_ctx) {
     if (!buffer_read_u8(cdata, output_bip32_path_len)) {
         return io_send_sw(SW_WRONG_DATA_LENGTH);
     }
@@ -101,7 +101,7 @@ int get_public_key(buffer_t *cdata,
     // Generate corresponding public key
     cx_ecfp_public_key_t public_key = {0};
     error = crypto_init_public_key(&private_key, &public_key, output_pubkey_ctx->raw_public_key);
-     // Wipe the private key from memory to protect against memory attacks
+    // Wipe the private key from memory to protect against memory attacks
     explicit_bzero(&private_key, sizeof(private_key));
 
     if (error != CX_OK) {
@@ -116,10 +116,8 @@ int handler_get_public_key(buffer_t *cdata, bool display) {
     explicit_bzero(&G_context, sizeof(G_context));
     G_context.req_type = CONFIRM_ADDRESS;
 
-    int err = get_public_key(cdata,
-                            &G_context.bip32_path_len,
-                            G_context.bip32_path,
-                            &G_context.pk_info);
+    int err =
+        get_public_key(cdata, &G_context.bip32_path_len, G_context.bip32_path, &G_context.pk_info);
 
     if (err) {
         G_context.req_type = REQUEST_UNDEFINED;
@@ -135,5 +133,3 @@ int handler_get_public_key(buffer_t *cdata, bool display) {
     G_context.req_type = REQUEST_UNDEFINED;  // all the work is done, reset the context
     return helper_send_response_pubkey();
 }
-
-
