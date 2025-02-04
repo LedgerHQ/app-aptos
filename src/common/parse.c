@@ -80,7 +80,6 @@ bool adjustDecimals(const char *src,
     return true;
 }
 unsigned short print_amount(uint64_t amount, char *out, uint32_t outlen, uint8_t decimals) {
-    
     if (amount == 0) {
         if (outlen < 2) {
             return 0;
@@ -91,7 +90,7 @@ unsigned short print_amount(uint64_t amount, char *out, uint32_t outlen, uint8_t
         return strlen(out);
     }
 
-    char tmp[MAX_AMOUNT_STR_LEN]; 
+    char tmp[MAX_AMOUNT_STR_LEN];
     char tmp2[MAX_AMOUNT_STR_LEN];
     uint32_t numDigits = 0, i;
     uint64_t base = 1;
@@ -114,6 +113,6 @@ unsigned short print_amount(uint64_t amount, char *out, uint32_t outlen, uint8_t
         if (strlen(tmp2) < outlen - 1) {
             strlcpy(out, tmp2, outlen);
         }
-    }       
+    }
     return strlen(out);
 }
