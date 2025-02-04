@@ -1,4 +1,5 @@
 #ifdef HAVE_SWAP
+
 #include <string.h>  // memset, explicit_bzero
 #include "swap.h"
 #include "constants.h"
