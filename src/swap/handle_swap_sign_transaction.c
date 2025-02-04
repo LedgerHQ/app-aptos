@@ -29,11 +29,11 @@ static uint8_t* G_swap_sign_return_value_address;
 
 /**
  * Copies both the transaction parameters and address into a static location
- * for posterior comparision against G_context, to avoid any injection attacks
+ * for posterior comparison against G_context, to avoid any injection attacks
  * through the Exchange App.
  *
  * @param[in] create_transaction_parameters_t
- * The transacttion parameters to be saved.
+ * The transaction parameters to be saved.
  * 
  * @return true if success,false otherwise.
  *
@@ -46,7 +46,7 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
         PRINTF("destination_address_extra_id memory not reserved\n");
         return false;
     } else if (params->destination_address_extra_id[0] != '\0') {
-        PRINTF("destination_address_extra_id is not empy: '%s'\n",
+        PRINTF("destination_address_extra_id is not empty: '%s'\n",
                params->destination_address_extra_id);
         return false;
     }
@@ -154,7 +154,7 @@ static bool validate_swap_amount(uint64_t amount) {
 bool swap_check_validity() {
     PRINTF("Inside Aptos swap_check_validity\n");
     if (!G_swap_validated.initialized) {
-        PRINTF("Swap Validated data not initalized.\n");
+        PRINTF("Swap Validated data not initialized.\n");
         return false;
     }
     // Validate it's and actual coin transfer type
