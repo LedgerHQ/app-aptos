@@ -133,7 +133,6 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
                     // This boolean will make the io_send_sw family instant reply + return to exchange
                     G_swap_response_ready = true;
                 }
-
                 if (swap_check_validity(G_context.tx_info.transaction.payload.entry_function.args.transfer.amount)) {
                     PRINTF("Swap response validated\n");
                     validate_transaction(true);

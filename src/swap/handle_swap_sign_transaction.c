@@ -11,10 +11,12 @@
 #include "sw.h"
 #include "os.h"
 #include "../globals.h"
+#include "common/parse.h"
 
 typedef struct swap_validated_s {
     bool initialized;
     uint8_t decimals;
+    // NOTE(jmartins): only needed for tokens
     char ticker[MAX_SWAP_TOKEN_LENGTH];
     uint64_t amount;
     char recipient[ADDRESS_LEN];
@@ -96,15 +98,6 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
     if (!swap_str_to_u64(params->amount, params->amount_length, &swap_validated.amount)) {
         return false;
     }
-    char printable_amount[MAX_PRINTABLE_AMOUNT_SIZE];
-    if (print_amount(swap_validated.amount,
-                     printable_amount,
-                     MAX_PRINTABLE_AMOUNT_SIZE,
-                     swap_validated.decimals) == 0) {
-        PRINTF("print_amount failed\n");
-    } else {
-        PRINTF("print_amount %s\n", printable_amount);
-    }
 
     swap_validated.initialized = true;
 
@@ -122,6 +115,10 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
 }
 
 static bool validate_swap_amount(uint64_t amount) {
+    if (amount != G_swap_validated.amount) {
+        return false;
+    }
+    // NOTE: in other Nano Apps the validation is done in string type. We're keeping it as well.
     char validated_amount_str[MAX_PRINTABLE_AMOUNT_SIZE];
     if (print_amount(G_swap_validated.amount,
                      validated_amount_str,
@@ -144,7 +141,6 @@ static bool validate_swap_amount(uint64_t amount) {
         PRINTF("Amount validated in swap = %s\n", validated_amount_str);
         return false;
     }
-    PRINTF("Amounts match: validated(%s) = input(%s) \n", validated_amount_str, amount_str);
     return true;
 }
 
@@ -155,9 +151,53 @@ static bool validate_swap_amount(uint64_t amount) {
  * @return true if success,false otherwise.
  *
  */
-bool swap_check_validity(uint64_t amount) {
+bool swap_check_validity() {
     PRINTF("Inside Aptos swap_check_validity\n");
-    validate_swap_amount(amount);
+    if (!G_swap_validated.initialized) {
+        PRINTF("Swap Validated data not initalized.\n");
+        return false;
+    }
+    // Validate it's and actual coin transfer type
+    if (G_context.tx_info.transaction.tx_variant != TX_RAW) {
+        PRINTF("TX variant different from TX_RAW is not compatible with Swap.\n");
+        return false;
+    }
+
+    if (G_context.tx_info.transaction.payload_variant != PAYLOAD_ENTRY_FUNCTION) {
+        PRINTF("Payload variant different from PAYLOAD_ENTRY_FUNCTION is not compatible with Swap.\n");
+        return false;
+    }
+
+    // Differentiate between the different types of transactions
+    uint64_t amount = 0;
+    uint8_t* receiver;
+    switch (G_context.tx_info.transaction.payload.entry_function.known_type) {
+        case FUNC_APTOS_ACCOUNT_TRANSFER:
+            amount = G_context.tx_info.transaction.payload.entry_function.args.transfer.amount;
+            receiver = G_context.tx_info.transaction.payload.entry_function.args.transfer.receiver;
+            break;
+        case FUNC_COIN_TRANSFER:
+        case FUNC_APTOS_ACCOUNT_TRANSFER_COINS:
+            amount = G_context.tx_info.transaction.payload.entry_function.args.coin_transfer.amount;
+            receiver = G_context.tx_info.transaction.payload.entry_function.args.coin_transfer.receiver;
+            break;
+        default:
+            PRINTF("Unknown function type\n");
+            return false;
+    }
+
+    if (!validate_swap_amount(amount)) {
+        PRINTF("Amount on Transaction is different from validated package.\n");
+        return false;
+    }
+
+    // Validate recipient
+    if (memcmp(receiver, G_swap_validated.recipient, ADDRESS_LEN) != 0) {
+        PRINTF("Recipient on Transaction is different from validated package.\n");
+        return false;
+    }
+
+    // Validate recipient
     return true;
 }
 
