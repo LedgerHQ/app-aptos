@@ -41,11 +41,11 @@
 
 int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
     PRINTF("handler_sign_tx called\n");
-    #ifdef HAVE_SWAP
+#ifdef HAVE_SWAP
     if (G_called_from_swap) {
         PRINTF("handler_sign_tx called from Exchange App \n");
     }
-    #endif
+#endif
 
     static uint8_t prev_chunk = 0;  // no need to burden the global context
 
@@ -117,7 +117,7 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
 
             G_context.state = STATE_PARSED;
 
-            #ifdef HAVE_SWAP
+#ifdef HAVE_SWAP
             // If we are in swap context, do not redisplay the message data
             // Instead, ensure they are identical with what was previously displayed
             if (G_called_from_swap) {
@@ -130,14 +130,17 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
                 } else {
                     // We will quit the app after this transaction, whether it succeeds or fails
                     PRINTF("Swap response is ready, the app will quit after the next send\n");
-                    // This boolean will make the io_send_sw family instant reply + return to exchange
+                    // This boolean will make the io_send_sw family instant reply + return to
+                    // exchange
                     G_swap_response_ready = true;
                 }
-                if (swap_check_validity(G_context.tx_info.transaction.payload.entry_function.args.transfer.amount)) {
+                if (swap_check_validity(G_context.tx_info.transaction.payload.entry_function.args
+                                            .transfer.amount)) {
                     PRINTF("Swap response validated\n");
                     validate_transaction(true);
                 } else {
-                    // Unreachable due to io_send_sw instant replying and quitting to Exchange in Swap mode
+                    // Unreachable due to io_send_sw instant replying and quitting to Exchange in
+                    // Swap mode
                     PRINTF("swap_check_validity failed\n");
                     // Failsafe
                     swap_finalize_exchange_sign_transaction(false);
@@ -147,11 +150,11 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
             } else {
                 return ui_display_transaction();
             }
-            #else
+#else
             int ui_status = ui_display_transaction();
             G_context.req_type = REQUEST_UNDEFINED;  // all the work is done, reset the context
             return ui_status;
-            #endif
+#endif
         }
     }
 

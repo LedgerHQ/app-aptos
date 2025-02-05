@@ -34,7 +34,7 @@ static uint8_t* G_swap_sign_return_value_address;
  *
  * @param[in] create_transaction_parameters_t
  * The transaction parameters to be saved.
- * 
+ *
  * @return true if success,false otherwise.
  *
  */
@@ -128,10 +128,7 @@ static bool validate_swap_amount(uint64_t amount) {
         return false;
     }
     char amount_str[MAX_PRINTABLE_AMOUNT_SIZE];
-    if (print_amount(amount,
-                     amount_str,
-                     sizeof(amount_str),
-                     G_swap_validated.decimals) == 0) {
+    if (print_amount(amount, amount_str, sizeof(amount_str), G_swap_validated.decimals) == 0) {
         PRINTF("Conversion failed\n");
         return false;
     }
@@ -147,7 +144,7 @@ static bool validate_swap_amount(uint64_t amount) {
 /**
  * Validates that the transaction parameters saved in the app memory
  * are the same as the ones in the Exchange App current G_context.
- * 
+ *
  * @return true if success,false otherwise.
  *
  */
@@ -164,7 +161,8 @@ bool swap_check_validity() {
     }
 
     if (G_context.tx_info.transaction.payload_variant != PAYLOAD_ENTRY_FUNCTION) {
-        PRINTF("Payload variant different from PAYLOAD_ENTRY_FUNCTION is not compatible with Swap.\n");
+        PRINTF("
+            Payload variant different from PAYLOAD_ENTRY_FUNCTION is not compatible with Swap.\n");
         return false;
     }
 
@@ -179,7 +177,8 @@ bool swap_check_validity() {
         case FUNC_COIN_TRANSFER:
         case FUNC_APTOS_ACCOUNT_TRANSFER_COINS:
             amount = G_context.tx_info.transaction.payload.entry_function.args.coin_transfer.amount;
-            receiver = G_context.tx_info.transaction.payload.entry_function.args.coin_transfer.receiver;
+            receiver =
+                G_context.tx_info.transaction.payload.entry_function.args.coin_transfer.receiver;
             break;
         default:
             PRINTF("Unknown function type\n");

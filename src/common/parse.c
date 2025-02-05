@@ -18,7 +18,7 @@
 #include <string.h>
 #include "parse.h"
 
-#define MAX_AMOUNT_STR_LEN 21 // 19 for u64 + 1 for '\0' +1 for '.'
+#define MAX_AMOUNT_STR_LEN 21  // 19 for u64 + 1 for '\0' +1 for '.'
 
 bool adjustDecimals(const char *src,
                     uint32_t srcLength,
