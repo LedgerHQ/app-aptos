@@ -114,6 +114,16 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
     return true;
 }
 
+/**
+ * Validates that amount is the same as the one saved in the app memory.
+ * Does a string comparison as well as a uint64_t comparison.
+ *
+ * param[in] amount
+ * The amount to be validated.
+ *
+ * @return true if success,false otherwise.
+ *
+ */
 static bool validate_swap_amount(uint64_t amount) {
     if (amount != G_swap_validated.amount) {
         return false;
