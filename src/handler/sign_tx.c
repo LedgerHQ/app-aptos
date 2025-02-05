@@ -126,6 +126,7 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
                     // This code should never be triggered as the app is supposed to exit after
                     // sending the signed transaction
                     PRINTF("Safety against double signing triggered\n");
+                    io_send_sw(SW_SWAP_CHECKING_FAIL);
                     os_sched_exit(-1);
                 } else {
                     // We will quit the app after this transaction, whether it succeeds or fails
@@ -143,6 +144,7 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
                     // Swap mode
                     PRINTF("swap_check_validity failed\n");
                     // Failsafe
+                    io_send_sw(SW_SWAP_CHECKING_FAIL);
                     swap_finalize_exchange_sign_transaction(false);
                 }
 

@@ -67,4 +67,4 @@
 /**
  * Status word for fail to display gas fee.
  */
-#define SW_SWAP_CHECKING_FAIL 0xB010
+#define SW_SWAP_CHECKING_FAIL 0xB00A
