@@ -32,8 +32,21 @@
 #include "../ui/display.h"
 #include "../transaction/types.h"
 #include "../transaction/deserialize.h"
+#include "../ui/action/validate.h"
+
+#ifdef HAVE_SWAP
+#include "swap.h"
+#include "handle_swap_sign_transaction.h"
+#endif
 
 int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
+    PRINTF("handler_sign_tx called\n");
+#ifdef HAVE_SWAP
+    if (G_called_from_swap) {
+        PRINTF("handler_sign_tx called from Exchange App \n");
+    }
+#endif
+
     static uint8_t prev_chunk = 0;  // no need to burden the global context
 
     if (chunk == 0) {  // first APDU, parse BIP32 path
@@ -104,9 +117,44 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
 
             G_context.state = STATE_PARSED;
 
+#ifdef HAVE_SWAP
+            // If we are in swap context, do not redisplay the message data
+            // Instead, ensure they are identical with what was previously displayed
+            if (G_called_from_swap) {
+                if (G_swap_response_ready) {
+                    // Safety against trying to make the app sign multiple TX
+                    // This code should never be triggered as the app is supposed to exit after
+                    // sending the signed transaction
+                    PRINTF("Safety against double signing triggered\n");
+                    os_sched_exit(-1);
+                } else {
+                    // We will quit the app after this transaction, whether it succeeds or fails
+                    PRINTF("Swap response is ready, the app will quit after the next send\n");
+                    // This boolean will make the io_send_sw family instant reply + return to
+                    // exchange
+                    G_swap_response_ready = true;
+                }
+                if (swap_check_validity(G_context.tx_info.transaction.payload.entry_function.args
+                                            .transfer.amount)) {
+                    PRINTF("Swap response validated\n");
+                    validate_transaction(true);
+                } else {
+                    // Unreachable due to io_send_sw instant replying and quitting to Exchange in
+                    // Swap mode
+                    PRINTF("swap_check_validity failed\n");
+                    // Failsafe
+                    swap_finalize_exchange_sign_transaction(false);
+                }
+
+                return 0;
+            } else {
+                return ui_display_transaction();
+            }
+#else
             int ui_status = ui_display_transaction();
             G_context.req_type = REQUEST_UNDEFINED;  // all the work is done, reset the context
             return ui_status;
+#endif
         }
     }
 
