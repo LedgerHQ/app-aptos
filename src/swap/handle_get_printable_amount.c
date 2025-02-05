@@ -3,6 +3,7 @@
 #include <string.h>  // memset, explicit_bzero
 #include "swap.h"
 #include "constants.h"
+#include "common/parse.h"
 
 #define MAX_TICKER_LEN 16
 
