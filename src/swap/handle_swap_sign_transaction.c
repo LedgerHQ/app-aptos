@@ -93,7 +93,7 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
         PRINTF("Address copy error\n");
         return false;
     }
-
+    PRINTF("Recipient: %s\n", swap_validated.recipient);
     // Save amount
     if (!swap_str_to_u64(params->amount, params->amount_length, &swap_validated.amount)) {
         return false;
@@ -171,8 +171,7 @@ bool swap_check_validity() {
     }
 
     if (G_context.tx_info.transaction.payload_variant != PAYLOAD_ENTRY_FUNCTION) {
-        PRINTF("
-            Payload variant different from PAYLOAD_ENTRY_FUNCTION is not compatible with Swap.\n");
+        PRINTF("Payload variant incompatible with Swap.\n");
         return false;
     }
 
