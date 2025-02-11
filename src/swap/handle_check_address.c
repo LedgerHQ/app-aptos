@@ -22,9 +22,38 @@
 #include "../address.h"
 #include "../handler/get_public_key.h"
 #include "../common/user_format.h"
+#include <ctype.h>
 
 // The address string length is 66, 2 characters for the prefix and 64 for the address
 #define ADDRESS_STRING_LENGTH 66
+
+/**
+ * Compares two strings case-insensitive.
+ * NOTE: this is implemented because the SDK does not have a working strcasecmp.
+ * Similar issue happens on ethereum 
+ * (https://github.com/LedgerHQ/app-ethereum/blob/45b96b767d017c73a14fdaccbb8947be0cd8ea6c/src_features/signTx/logic_signTx.c#L329)
+ * 
+ * TODO(jmartins): remove this function when the SDK has a working strcasecmp. 
+ *
+ * @param[in] s1
+ *   String to compare
+ * 
+ * @param[in] s2
+ *   String to compare against
+ *
+ * @return 0 if the strings are equal, less or greater than if s1 is lexicographically less or greater than s2 
+ */
+static int _strcasecmp(const char *s1, const char *s2) {
+    const unsigned char *p1 = (const unsigned char *) s1;
+    const unsigned char *p2 = (const unsigned char *) s2;
+    int result = 0;
+    if (p1 == p2)
+      return 0;
+    while ((result = toupper(*p1) - toupper(*p2++)) == 0)
+      if (*p1++ == '\0')
+        break;
+    return result;
+}
 
 /**
  * Handler for CHECK_ADDRESS command. If successfully parse BIP32 path,
@@ -88,7 +117,7 @@ void swap_handle_check_address(check_address_parameters_t *params) {
     PRINTF("address_to_check: %s\n", params->address_to_check);
     PRINTF("prefixed_address: %s\n", prefixed_address);
     // Compare the strings
-    if (strcmp(params->address_to_check, prefixed_address) != 0) {
+    if (_strcasecmp(params->address_to_check, prefixed_address) != 0) {
         PRINTF("addresses does not match\n");
     } else {
         PRINTF("addresses match\n");
