@@ -9,7 +9,7 @@
  *
  * @param[in] amount
  * Amount of coin.
- * 
+ *
  * @param[in] decimals
  * Number of decimal places that the string should have.
  *
