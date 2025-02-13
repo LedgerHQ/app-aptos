@@ -32,7 +32,7 @@
  * NOTE: this is implemented because the SDK does not have a working strcasecmp.
  * Similar issue happens on ethereum
  * (https://github.com/LedgerHQ/app-ethereum/blob/45b96b767d017c73a14fdaccbb8947be0cd8ea6c/src_features/signTx/logic_signTx.c#L329)
- * 
+ *
  * TODO(jmartins): remove this function when the SDK has a working strcasecmp.
  *
  * @param[in] s1
@@ -41,7 +41,7 @@
  * @param[in] s2
  *   String to compare against
  *
- * @return 0 if the strings are equal, less or greater than if s1 is lexicographically less or 
+ * @return 0 if the strings are equal, less or greater than if s1 is lexicographically less or
  * greater than s2
  */
 static int _strcasecmp(const char *s1, const char *s2) {
