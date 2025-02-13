@@ -19,7 +19,7 @@
  * @param[out] out_len
  * Size of the buffer of out.
  *
- * @return 0 if it fails, resulting string lenght otherwise.
+ * @return 0 if it fails, resulting string length otherwise.
  *
  */
 unsigned short print_amount(uint64_t amount, uint8_t decimals, char *out, uint32_t out_len);
