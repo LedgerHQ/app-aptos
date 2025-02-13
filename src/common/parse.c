@@ -24,29 +24,29 @@
  * Adjusts the number of decimals of a string representation of a number.
  * If the number of decimals is greater than the number of decimals in the string,
  * it adds zeros at the end of the string.
- * 
+ *
  * @param[in] src
  * The string representation of the number.
- * 
+ *
  * @param[in] src_length
  * The length of the string.
- * 
+ *
  * @param[in] decimals
  * The number of decimals that the string should have.
- * 
+ *
  * @param[out] target
  * The string to save the adjusted number.
- * 
+ *
  * @param[in] target_length
  * The size of the buffer of target.
- * 
+ *
  * @return true if success, false otherwise.
  */
 bool adjust_decimals(const char *src,
-                    uint32_t src_length,
-                    uint8_t decimals,
-                    char *target,
-                    uint32_t target_length) {
+                     uint32_t src_length,
+                     uint8_t decimals,
+                     char *target,
+                     uint32_t target_length) {
     uint32_t start_offset;
     uint32_t last_zero_offset = 0;
     uint32_t offset = 0;
@@ -164,7 +164,7 @@ static char to_lowercase(char c) {
 }
 
 static uint8_t lowercase_hex_to_int(char c) {
-    return (uint8_t) (is_digit(c) ? c - '0' : c - 'a' + 10);
+    return (uint8_t)(is_digit(c) ? c - '0' : c - 'a' + 10);
 }
 
 int hex_str_to_u8(const char *str, uint8_t *out, size_t n) {

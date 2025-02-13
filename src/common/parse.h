@@ -30,8 +30,8 @@ unsigned short print_amount(uint64_t amount, uint8_t decimals, char *out, uint32
  * is less then 2*n.
  *
  * @param[in] str
- * String with the hexadecimal characters to be read (if str has "0x" prefix, pointer should be set to 
- * next characters).
+ * String with the hexadecimal characters to be read (if str has "0x" prefix, pointer should be set 
+ * to next characters).
  * 
  * @param[out] out
  * Buffer to store the bytes read. Should be at least n bytes long.

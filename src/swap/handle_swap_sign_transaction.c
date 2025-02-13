@@ -87,7 +87,8 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
 
     // Save recipient
     PRINTF("Recipient in params: %s\n", params->destination_address);
-    if (hex_str_to_u8(params->destination_address + 2, swap_validated.recipient, ADDRESS_LEN) != 0){
+    if (hex_str_to_u8(params->destination_address + 2, swap_validated.recipient, ADDRESS_LEN) != 
+        0) {
         PRINTF("Fail to parse recipient\n");
     };
 
@@ -128,9 +129,9 @@ static bool validate_swap_amount(uint64_t amount) {
     // NOTE: in other Nano Apps the validation is done in string type. We're keeping it as well.
     char validated_amount_str[MAX_PRINTABLE_AMOUNT_SIZE];
     if (print_amount(G_swap_validated.amount,
-                    G_swap_validated.decimals,
-                    validated_amount_str,
-                    sizeof(validated_amount_str)) == 0) {
+                     G_swap_validated.decimals,
+                     validated_amount_str,
+                     sizeof(validated_amount_str)) == 0) {
         PRINTF("Conversion failed\n");
         return false;
     }
