@@ -12,6 +12,7 @@
 #include "os.h"
 #include "../globals.h"
 #include "common/parse.h"
+#include "common/wallet.h"
 
 typedef struct swap_validated_s {
     bool initialized;
@@ -19,7 +20,7 @@ typedef struct swap_validated_s {
     // NOTE(jmartins): only needed for tokens
     char ticker[MAX_SWAP_TOKEN_LENGTH];
     uint64_t amount;
-    char recipient[ADDRESS_LEN];
+    uint8_t recipient[ADDRESS_LEN];
 } swap_validated_t;
 
 static swap_validated_t G_swap_validated;
@@ -86,14 +87,11 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
     }
 
     // Save recipient
-    strlcpy(swap_validated.recipient,
-            params->destination_address,
-            sizeof(swap_validated.recipient));
-    if (swap_validated.recipient[sizeof(swap_validated.recipient) - 1] != '\0') {
-        PRINTF("Address copy error\n");
-        return false;
-    }
-    PRINTF("Recipient: %s\n", swap_validated.recipient);
+    PRINTF("Recipient in params: %s\n", params->destination_address);
+    if (buffer_read_hex_hash(params->destination_address + 2, swap_validated.recipient, ADDRESS_LEN) != 0){
+        PRINTF("Fail to parse recipient\n");
+    };
+
     // Save amount
     if (!swap_str_to_u64(params->amount, params->amount_length, &swap_validated.amount)) {
         return false;
@@ -170,6 +168,7 @@ bool swap_check_validity() {
         return false;
     }
 
+    PRINTF("Payload variant: %d\n", G_context.tx_info.transaction.payload_variant);
     if (G_context.tx_info.transaction.payload_variant != PAYLOAD_ENTRY_FUNCTION) {
         PRINTF("Payload variant incompatible with Swap.\n");
         return false;
@@ -202,6 +201,8 @@ bool swap_check_validity() {
     // Validate recipient
     if (memcmp(receiver, G_swap_validated.recipient, ADDRESS_LEN) != 0) {
         PRINTF("Recipient on Transaction is different from validated package.\n");
+        PRINTF("Recipient requested in the transaction: %.*H\n", ADDRESS_LEN, receiver);
+        PRINTF("Recipient validated in the swap: %.*H\n", ADDRESS_LEN, G_swap_validated.recipient);
         return false;
     }
 
