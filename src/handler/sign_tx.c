@@ -135,8 +135,7 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
                     // exchange
                     G_swap_response_ready = true;
                 }
-                if (swap_check_validity(G_context.tx_info.transaction.payload.entry_function.args
-                                            .transfer.amount)) {
+                if (swap_check_validity()) {
                     PRINTF("Swap response validated\n");
                     validate_transaction(true);
                 } else {

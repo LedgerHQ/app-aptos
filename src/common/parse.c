@@ -69,7 +69,7 @@ bool adjust_decimals(const char *src,
     } else {
         uint32_t sourceOffset = 0;
         uint32_t delta = src_length - decimals;
-        if (targetLength < src_length + 1 + 1) {
+        if (target_length < src_length + 1 + 1) {
             return false;
         }
         while (offset < delta) {
@@ -153,7 +153,7 @@ static bool is_lowercase_hex(char c) {
 }
 
 static bool is_uppercase(char c) {
-    return is_alpha && ('A' <= c && c <= 'Z');
+    return is_alpha(c) && ('A' <= c && c <= 'Z');
 }
 
 static char to_lowercase(char c) {
