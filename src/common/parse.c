@@ -172,7 +172,6 @@ int hex_str_to_u8(const char *str, uint8_t *out, size_t n) {
         return -1;
     }
     for (unsigned int i = 0; i < n; i++) {
-        PRINTF("%d\n", i);
         char c1, c2;
         c1 = to_lowercase(str[2 * i]);
         c2 = to_lowercase(str[2 * i + 1]);
