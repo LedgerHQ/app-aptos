@@ -139,8 +139,6 @@ int handler_sign_tx(buffer_t *cdata, uint8_t chunk, bool more) {
                     PRINTF("Swap response validated\n");
                     validate_transaction(true);
                 } else {
-                    // Unreachable due to io_send_sw instant replying and quitting to Exchange in
-                    // Swap mode
                     PRINTF("swap_check_validity failed\n");
                     // Failsafe
                     io_send_sw(SW_SWAP_CHECKING_FAIL);
