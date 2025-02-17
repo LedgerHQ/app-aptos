@@ -51,7 +51,7 @@ APPNAME = "Aptos"
 
 # Application version
 APPVERSION_M = 0
-APPVERSION_N = 6
+APPVERSION_N = 7
 APPVERSION_P = 10
 APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
@@ -106,8 +106,11 @@ ENABLE_NBGL_QRCODE = 1
 #ENABLE_NBGL_KEYPAD = 1
 
 ########################################
-#          Features disablers          #
+#          Features enables            #
 ########################################
+ENABLE_SWAP = 1
+
+
 # These advanced settings allow to disable some feature that are by
 # default enabled in the SDK `Makefile.standard_app`.
 #DISABLE_STANDARD_APP_FILES = 1

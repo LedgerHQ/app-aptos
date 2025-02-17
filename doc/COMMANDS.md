@@ -96,4 +96,5 @@ _Note:_ The maximum number of chunks depends on the maximum available RAM on eac
 | 0xB007 | `SW_BAD_STATE`               | Security issue with bad state               |
 | 0xB008 | `SW_SIGNATURE_FAIL`          | Signature of raw transaction failed         |
 | 0xB009 | `SW_DISPLAY_GAS_FEE_FAIL`    | Failed to display gas fee                   |
+| 0xB00A | `SW_SWAP_CHECKING_FAIL`      | Failed to validate a swap transaction       |
 | 0x9000 | `OK`                         | Success                                     |

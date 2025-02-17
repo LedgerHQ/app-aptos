@@ -64,3 +64,7 @@
  * Status word for fail to display gas fee.
  */
 #define SW_DISPLAY_GAS_FEE_FAIL 0xB009
+/**
+ * Status word for fail on swap validity check.
+ */
+#define SW_SWAP_CHECKING_FAIL 0xB00A

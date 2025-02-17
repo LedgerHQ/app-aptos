@@ -32,26 +32,30 @@
 #include "../handler/sign_tx.h"
 
 int apdu_dispatcher(const command_t *cmd) {
+    PRINTF("Inside Aptos apdu_dispatcher\n");
     if (cmd->cla != CLA) {
         return io_send_sw(SW_CLA_NOT_SUPPORTED);
     }
 
     buffer_t buf = {0};
-
+    PRINTF("Dispatching APDU for specific function call\n");
     switch (cmd->ins) {
         case GET_VERSION:
+            PRINTF("GET_VERSION\n");
             if (cmd->p1 != 0 || cmd->p2 != 0) {
                 return io_send_sw(SW_WRONG_P1P2);
             }
 
             return handler_get_version();
         case GET_APP_NAME:
+            PRINTF("GET_APP_NAME\n");
             if (cmd->p1 != 0 || cmd->p2 != 0) {
                 return io_send_sw(SW_WRONG_P1P2);
             }
 
             return handler_get_app_name();
         case GET_PUBLIC_KEY:
+            PRINTF("GET_PUBLIC_KEY\n");
             if (cmd->p1 > 1 || cmd->p2 > 0) {
                 return io_send_sw(SW_WRONG_P1P2);
             }
@@ -66,20 +70,23 @@ int apdu_dispatcher(const command_t *cmd) {
 
             return handler_get_public_key(&buf, (bool) cmd->p1);
         case SIGN_TX:
+            PRINTF("SIGN_TX\n");
             if ((cmd->p1 == P1_START && cmd->p2 != P2_MORE) ||  //
                 cmd->p1 > P1_MAX ||                             //
                 (cmd->p2 != P2_LAST && cmd->p2 != P2_MORE)) {
+                PRINTF("Wrong P1 & P2 combo\n");
                 return io_send_sw(SW_WRONG_P1P2);
             }
 
             if (!cmd->data) {
+                PRINTF("Lacking data\n");
                 return io_send_sw(SW_WRONG_DATA_LENGTH);
             }
 
             buf.ptr = cmd->data;
             buf.size = cmd->lc;
             buf.offset = 0;
-
+            PRINTF("Inside Aptos apdu_dispatcher: ready to call handler_sign_tx\n");
             return handler_sign_tx(&buf, cmd->p1, (bool) (cmd->p2 & P2_MORE));
         default:
             return io_send_sw(SW_INS_NOT_SUPPORTED);
