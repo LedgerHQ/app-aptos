@@ -3,7 +3,7 @@ from application_client.aptos_response_unpacker import unpack_get_version_respon
 
 # Taken from the Makefile, to update every time the Makefile version is bumped
 MAJOR = 0
-MINOR = 7
+MINOR = 6
 PATCH = 10
 
 

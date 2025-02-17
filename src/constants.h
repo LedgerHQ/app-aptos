@@ -36,8 +36,3 @@
  * Signature length (bytes).
  */
 #define SIGNATURE_LEN 64
-
-/**
- * Aptos decimal precision.
- */
-#define APT_DECIMAL_PRECISION 8
