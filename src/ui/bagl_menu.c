@@ -51,7 +51,7 @@ void ui_menu_main() {
     ui_flow_display(ux_menu_main_flow);
 }
 
-UX_STEP_NOCB(ux_menu_info_step, bn, {"Aptos App", "(c) 2022 Pontem"});
+UX_STEP_NOCB(ux_menu_info_step, bn, {"Aptos App", "(c) 2024 Ledger"});
 UX_STEP_NOCB(ux_menu_version_step, bn, {"Version", APPVERSION});
 UX_STEP_CB(ux_menu_back_step, pb, ui_menu_main(), {&C_icon_back, "Back"});
 

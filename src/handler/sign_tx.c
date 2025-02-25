@@ -33,6 +33,7 @@
 #include "../transaction/types.h"
 #include "../transaction/deserialize.h"
 #include "../ui/action/validate.h"
+#include "../swap/handle_swap_sign_transaction.h"
 
 #ifdef HAVE_SWAP
 #include "swap.h"
