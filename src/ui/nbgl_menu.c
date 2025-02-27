@@ -39,9 +39,7 @@ enum {
 };
 
 static const char* const INFO_TYPES[] = {"Version", "Developer", "Copyright"};
-static const char* const INFO_CONTENTS[] = {APPVERSION,
-                                            "Pontem Network",
-                                            "(c) 2022 Pontem Network"};
+static const char* const INFO_CONTENTS[] = {APPVERSION, "Ledger", "(c) 2024 Ledger"};
 
 static nbgl_contentSwitch_t g_switches[SWITCHES_COUNT];
 
