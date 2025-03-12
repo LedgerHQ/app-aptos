@@ -338,7 +338,6 @@ parser_status_e coin_transfer_function_deserialize(buffer_t *buf, transaction_t 
 }
 
 parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *tx) {
-    
     if (tx->payload_variant != PAYLOAD_ENTRY_FUNCTION) {
         return PAYLOAD_UNDEFINED_ERROR;
     }
@@ -352,12 +351,10 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
         return TYPE_ARGS_SIZE_READ_ERROR;
     }
 
-    
     if (payload->args.ty_size != 1) {
         return TYPE_ARGS_SIZE_UNEXPECTED_ERROR;
     }
 
-    
     uint32_t ty_arg_variant = TYPE_TAG_UNDEFINED;
     // read type tag variant
     if (!bcs_read_u32_from_uleb128(buf, &ty_arg_variant)) {
@@ -393,8 +390,7 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
                                      fa_transfer->ty_args.name.len)) {
         return STRUCT_NAME_BYTES_READ_ERROR;
     }
-    
-    
+
     // read coin struct args size
     if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &fa_transfer->ty_args.type_args_size)) {
         return STRUCT_TYPE_ARGS_SIZE_READ_ERROR;
@@ -411,7 +407,7 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     if (payload->args.args_size != 3) {
         return ARGS_SIZE_UNEXPECTED_ERROR;
     }
-    
+
     uint32_t fa_store_addr_len;
     // read fungible stor address len
     if (!bcs_read_u32_from_uleb128(buf, &fa_store_addr_len)) {
@@ -450,7 +446,7 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     if (!bcs_read_u64(buf, &payload->args.fa_transfer.amount)) {
         return AMOUNT_READ_ERROR;
     }
-    
+
     return PARSING_OK;
 }
 
