@@ -37,9 +37,9 @@ def prepare_tx():
   )
 
   # Create the raw transaction (TX_RAW)
-  fees = 900
-  max_gas_amount = 1100
-  gas_unit_price = int(fees/max_gas_amount)
+  max_gas_amount = 9
+  gas_unit_price = 100
+  fees = max_gas_amount * gas_unit_price
   txn = RawTransaction(
       sender=sender,
       sequence_number=sequence_number,
