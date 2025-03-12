@@ -75,11 +75,16 @@ typedef struct {
     fixed_bytes_t name;
 } module_id_t;
 
+typedef struct {
+    uint8_t inner[ADDRESS_LEN];
+} fungible_asset_coin_t;
+
 typedef enum {
     FUNC_UNKNOWN = 0,
     FUNC_APTOS_ACCOUNT_TRANSFER = 1,
     FUNC_COIN_TRANSFER = 2,
     FUNC_APTOS_ACCOUNT_TRANSFER_COINS = 3,
+    FUNC_FUNGIBLE_STORE_TRANSFER = 4,
 } entry_function_known_type_t;
 
 typedef struct {
@@ -99,6 +104,13 @@ typedef struct {
 } agrs_coin_trasfer_t;
 
 typedef struct {
+    uint8_t receiver[ADDRESS_LEN];
+    uint64_t amount;
+    type_tag_struct_t ty_args;
+    fungible_asset_coin_t fungible_asset;
+} agrs_fungible_asset_trasfer_t;
+
+typedef struct {
     module_id_t module_id;
     fixed_bytes_t function_name;
     entry_function_known_type_t known_type;
@@ -109,6 +121,7 @@ typedef struct {
             agrs_raw_t raw;
             agrs_aptos_account_trasfer_t transfer;
             agrs_coin_trasfer_t coin_transfer;
+            agrs_fungible_asset_trasfer_t fa_transfer;
         };
     } args;
 } entry_function_payload_t;
