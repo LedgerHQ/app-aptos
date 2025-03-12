@@ -373,6 +373,8 @@ int ui_prepare_entry_function() {
         case FUNC_COIN_TRANSFER:
         case FUNC_APTOS_ACCOUNT_TRANSFER_COINS:
             return ui_display_tx_coin_transfer();
+        case FUNC_FUNGIBLE_STORE_TRANSFER:
+            return ui_display_tx_fungible_asset_transfer();
         default:
             memset(g_tx_type, 0, sizeof(g_tx_type));
             snprintf(g_tx_type, sizeof(g_tx_type), "Function call");
@@ -479,6 +481,46 @@ int ui_prepare_tx_coin_transfer() {
     }
 
     snprintf(g_amount, sizeof(g_amount), "%s %.*s", info->ticker , sizeof(amount), amount);
+    PRINTF("Amount: %s\n", g_amount);
+
+    return UI_PREPARED;
+}
+
+int ui_prepare_tx_fungible_asset_transfer() {
+    agrs_fungible_asset_trasfer_t *transfer =
+        &G_context.tx_info.transaction.payload.entry_function.args.fa_transfer;
+    char transfer_fa_coin_address_hex[67] = {0};
+
+    // For well-known functions, display the transaction type in human-readable format
+    memset(g_tx_type, 0, sizeof(g_tx_type));
+    snprintf(g_tx_type, sizeof(g_tx_type), "Fungible asset transfer");
+    PRINTF("Tx Type: %s\n", g_tx_type);
+
+    // Be sure to display at least 1 byte, even if it is zero
+    size_t leading_zeros = count_leading_zeros(transfer->fungible_asset.inner, ADDRESS_LEN - 1);
+    if (0 > format_prefixed_hex(transfer->fungible_asset.inner + leading_zeros,
+                                ADDRESS_LEN - leading_zeros,
+                                transfer_fa_coin_address_hex,
+                                sizeof(transfer_fa_coin_address_hex))) {
+        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
+    }
+    memset(g_struct, 0, sizeof(g_struct));
+    snprintf(g_struct,
+             sizeof(g_struct),
+             "%s",
+             transfer_fa_coin_address_hex);
+    PRINTF("Coin Type: %s\n", g_struct);
+
+    memset(g_address, 0, sizeof(g_address));
+    if (0 > format_prefixed_hex(transfer->receiver, ADDRESS_LEN, g_address, sizeof(g_address))) {
+        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
+    }
+    PRINTF("Receiver: %s\n", g_address);
+
+    memset(g_amount, 0, sizeof(g_amount));
+    if (!format_fpu64(g_amount, sizeof(g_amount), transfer->amount, 8)) {
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
     PRINTF("Amount: %s\n", g_amount);
 
     return UI_PREPARED;

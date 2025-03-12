@@ -368,41 +368,31 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     }
 
     // READ type Arguments
-    PRINTF("RABL 1 HERE %d \n", payload->args.ty_size);
     agrs_fungible_asset_trasfer_t *fa_transfer = &payload->args.fa_transfer;
     // read coin struct address field
     if (!bcs_read_fixed_bytes(buf, (uint8_t *) &fa_transfer->ty_args.address, ADDRESS_LEN)) {
         return STRUCT_ADDRESS_READ_ERROR;
     }
-    if (fa_transfer->ty_args.address[ADDRESS_LEN - 1] == 0x01) {
-        PRINTF("RABL 2 HERE address 0x01 %d \n", &fa_transfer->ty_args.address);
-    }
     // read coin struct module name len
     if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &fa_transfer->ty_args.module_name.len)) {
         return STRUCT_MODULE_LEN_READ_ERROR;
     }
-    PRINTF("RABL 3 HERE %d \n", fa_transfer->ty_args.module_name.len);
     // read coin struct module name field
     if (!bcs_read_ptr_to_fixed_bytes(buf,
                                      &fa_transfer->ty_args.module_name.bytes,
                                      fa_transfer->ty_args.module_name.len)) {
         return STRUCT_MODULE_BYTES_READ_ERROR;
     }
-    fa_transfer->ty_args.module_name.bytes[fa_transfer->ty_args.module_name.len-1] = '\0';
-    PRINTF("RABL 4 HERE %s \n", fa_transfer->ty_args.module_name.bytes);
     // read coin struct name len
     if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &fa_transfer->ty_args.name.len)) {
         return STRUCT_NAME_LEN_READ_ERROR;
     }
-    PRINTF("RABL 5 HERE %d \n", fa_transfer->ty_args.name.len);
     // read coin struct name field
     if (!bcs_read_ptr_to_fixed_bytes(buf,
                                      &fa_transfer->ty_args.name.bytes,
                                      fa_transfer->ty_args.name.len)) {
         return STRUCT_NAME_BYTES_READ_ERROR;
     }
-    fa_transfer->ty_args.name.bytes[fa_transfer->ty_args.name.len-1] = '\0';
-    PRINTF("RABL 6 HERE %s \n", fa_transfer->ty_args.name.bytes);
     
     
     // read coin struct args size
@@ -421,7 +411,6 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     if (payload->args.args_size != 3) {
         return ARGS_SIZE_UNEXPECTED_ERROR;
     }
-    PRINTF("RABL 7 HERE %d \n", payload->args.args_size);
     
     uint32_t fa_store_addr_len;
     // read fungible stor address len
@@ -432,13 +421,10 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
         return WRONG_ADDRESS_LEN_ERROR;
     }
 
-    PRINTF("RABL 8 HERE %d \n", fa_store_addr_len);
     // add fungible store address
     if (!bcs_read_fixed_bytes(buf, (uint8_t *) &fa_transfer->fungible_asset.inner, ADDRESS_LEN)) {
         return STRUCT_ADDRESS_READ_ERROR;
     }
-    fa_transfer->fungible_asset.inner[ADDRESS_LEN - 1] = '\0';
-    PRINTF("RABL 9 HERE %s \n", fa_transfer->fungible_asset.inner);
 
     uint32_t receiver_len;
     // read receiver address len
@@ -448,7 +434,6 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     if (receiver_len != ADDRESS_LEN) {
         return WRONG_ADDRESS_LEN_ERROR;
     }
-    PRINTF("RABL 9 HERE %d \n", receiver_len);
     // read receiver address field
     if (!bcs_read_fixed_bytes(buf, (uint8_t *) &payload->args.fa_transfer.receiver, ADDRESS_LEN)) {
         return RECEIVER_ADDR_READ_ERROR;
@@ -465,8 +450,7 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     if (!bcs_read_u64(buf, &payload->args.fa_transfer.amount)) {
         return AMOUNT_READ_ERROR;
     }
-    PRINTF("fa_transfer_function_deserialize RABL amount %d \n", payload->args.fa_transfer.amount);
-
+    
     return PARSING_OK;
 }
 
@@ -474,8 +458,6 @@ entry_function_known_type_t determine_function_type(transaction_t *tx) {
     if (tx->payload_variant != PAYLOAD_ENTRY_FUNCTION) {
         return FUNC_UNKNOWN;
     }
-
-    PRINTF("determine_function_type RABL  \n");
 
     if (tx->payload.entry_function.module_id.address[ADDRESS_LEN - 1] == 0x01 &&
         bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "aptos_account", 13) &&
