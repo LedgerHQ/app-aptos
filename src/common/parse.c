@@ -164,7 +164,7 @@ static char to_lowercase(char c) {
 }
 
 static uint8_t lowercase_hex_to_int(char c) {
-    return (uint8_t) (is_digit(c) ? c - '0' : c - 'a' + 10);
+    return (uint8_t)(is_digit(c) ? c - '0' : c - 'a' + 10);
 }
 
 int hex_str_to_u8(const char *str, uint8_t *out, size_t n) {
