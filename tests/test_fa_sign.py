@@ -18,7 +18,7 @@ def prepare_tx():
   sender = AccountAddress.from_str(transmitter)
   receiver =  AccountAddress.from_str(destination)
 
-  contractAddress = AccountAddress.from_str("0x7be51d04d3a482fa056bc094bc5eadad005aaf823a95269410f08730f0d03cb5")
+  contractAddress = AccountAddress.from_str("0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b")
 
   send_amount = 1000000
   # Transaction parameters

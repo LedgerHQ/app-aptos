@@ -164,23 +164,21 @@ int ui_display_tx_fungible_asset_transfer() {
         pairs[0].value = g_tx_type;
         pairs[1].item = "Function";
         pairs[1].value = g_function;
-        pairs[2].item = "Coin type";
-        pairs[2].value = g_struct;
-        pairs[3].item = "Receiver";
+        pairs[2].item = "Amount";
+        pairs[2].value = g_amount;
+        pairs[3].item = "To";
         pairs[3].value = g_address;
-        pairs[4].item = "Amount";
-        pairs[4].value = g_amount;
-        pairs[5].item = "Gas fee";
-        pairs[5].value = g_gas_fee;
+        pairs[4].item = "Gas fee";
+        pairs[4].value = g_gas_fee;
 
         pair_list.nbMaxLinesForValue = 0;
-        pair_list.nbPairs = 6;
+        pair_list.nbPairs = 5;
         pair_list.pairs = pairs;
 
         nbgl_useCaseReview(TYPE_TRANSACTION,
                            &pair_list,
                            &C_aptos_logo_64px,
-                           "Review transaction to transfer coins",
+                           "Review transaction to transfer fungible assets",
                            NULL,
                            "Sign transaction?",
                            review_choice);
