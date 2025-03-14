@@ -3,8 +3,8 @@ from application_client.aptos_response_unpacker import unpack_get_version_respon
 
 # Taken from the Makefile, to update every time the Makefile version is bumped
 MAJOR = 0
-MINOR = 6
-PATCH = 10
+MINOR = 7
+PATCH = 11
 
 
 # In this test we check the behavior of the device when asked to provide the app version
