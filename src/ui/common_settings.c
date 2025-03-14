@@ -21,9 +21,9 @@
 #include "../globals.h"
 
 void settings_show_full_message_change(uint8_t value) {
-    nvm_write((void*) &N_storage.settings.show_full_message, &value, sizeof(value));
+    nvm_write((void *) &N_storage.settings.show_full_message, &value, sizeof(value));
 }
 
 void settings_allow_blind_signing_change(uint8_t value) {
-    nvm_write((void*) &N_storage.settings.allow_blind_signing, &value, sizeof(value));
+    nvm_write((void *) &N_storage.settings.allow_blind_signing, &value, sizeof(value));
 }

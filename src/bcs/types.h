@@ -75,28 +75,40 @@ typedef struct {
     fixed_bytes_t name;
 } module_id_t;
 
+typedef struct {
+    uint8_t address[ADDRESS_LEN];
+} fungible_asset_store_t;
+
 typedef enum {
     FUNC_UNKNOWN = 0,
     FUNC_APTOS_ACCOUNT_TRANSFER = 1,
     FUNC_COIN_TRANSFER = 2,
     FUNC_APTOS_ACCOUNT_TRANSFER_COINS = 3,
+    FUNC_FUNGIBLE_STORE_TRANSFER = 4,
 } entry_function_known_type_t;
 
 typedef struct {
     type_tag_t *ty_args;
     fixed_bytes_t *args;
-} agrs_raw_t;
+} args_raw_t;
 
 typedef struct {
     uint8_t receiver[ADDRESS_LEN];
     uint64_t amount;
-} agrs_aptos_account_trasfer_t;
+} args_aptos_account_transfer_t;
 
 typedef struct {
     uint8_t receiver[ADDRESS_LEN];
     uint64_t amount;
     type_tag_struct_t ty_coin;
-} agrs_coin_trasfer_t;
+} args_coin_transfer_t;
+
+typedef struct {
+    uint8_t receiver[ADDRESS_LEN];
+    uint64_t amount;
+    type_tag_struct_t ty_args;
+    fungible_asset_store_t fungible_asset;
+} args_fungible_asset_transfer_t;
 
 typedef struct {
     module_id_t module_id;
@@ -106,9 +118,10 @@ typedef struct {
         size_t ty_size;
         size_t args_size;
         union {
-            agrs_raw_t raw;
-            agrs_aptos_account_trasfer_t transfer;
-            agrs_coin_trasfer_t coin_transfer;
+            args_raw_t raw;
+            args_aptos_account_transfer_t transfer;
+            args_coin_transfer_t coin_transfer;
+            args_fungible_asset_transfer_t fa_transfer;
         };
     } args;
 } entry_function_payload_t;

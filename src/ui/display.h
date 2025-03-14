@@ -39,3 +39,6 @@ int ui_prepare_tx_aptos_account_transfer(void);
 
 int ui_display_tx_coin_transfer(void);
 int ui_prepare_tx_coin_transfer(void);
+
+int ui_display_tx_fungible_asset_transfer(void);
+int ui_prepare_tx_fungible_asset_transfer(void);

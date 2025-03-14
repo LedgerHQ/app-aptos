@@ -198,7 +198,25 @@ static const token_info_t TOKEN_MAPPING[] = {
     {.ticker = "lzWETH",
      .token = "Wrapped Ether (LayerZero)",
      .coin_type =
-         "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::WETH"}};
+         "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::WETH"},
+    {.ticker = "AMA",
+     .token = "Amaterasu",
+     .coin_type = "0xd0ab8c2f76cd640455db56ca758a9766a966c88f77920347aac1719edab1df5e"},
+    {.ticker = "CELL",
+     .token = "CELLANA",
+     .coin_type = "0x2ebb2ccac5e027a87fa0e2e5f656a3a4238d6a48d93ec9b610d570fc0aa0df12"},
+    {.ticker = "MKL",
+     .token = "MKL",
+     .coin_type = "0x878370592f9129e14b76558689a4b570ad22678111df775befbfcbc9fb3d90ab"},
+    {.ticker = "USDT",
+     .token = "Tether USD",
+     .coin_type = "0x357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b"},
+    {.ticker = "TruAPT",
+     .token = "TruAPT coin",
+     .coin_type = "0xaef6a8c3182e076db72d64324617114cacf9a52f28325edc10b483f7f05da0e7"},
+    {.ticker = "USDC",
+     .token = "USDC",
+     .coin_type = "0xbae207659db88bea0cbead6da0ed00aac12edcdda169e591cd41c94180b46f3b"}};
 
 static size_t count_leading_zeros(const uint8_t *src, size_t len) {
     for (size_t i = 0; i < len; i++) {
@@ -323,6 +341,8 @@ int ui_prepare_entry_function() {
         case FUNC_COIN_TRANSFER:
         case FUNC_APTOS_ACCOUNT_TRANSFER_COINS:
             return ui_display_tx_coin_transfer();
+        case FUNC_FUNGIBLE_STORE_TRANSFER:
+            return ui_display_tx_fungible_asset_transfer();
         default:
             memset(g_tx_type, 0, sizeof(g_tx_type));
             snprintf(g_tx_type, sizeof(g_tx_type), "Function call");
@@ -334,7 +354,7 @@ int ui_prepare_entry_function() {
 }
 
 int ui_prepare_tx_aptos_account_transfer() {
-    agrs_aptos_account_trasfer_t *transfer =
+    args_aptos_account_transfer_t *transfer =
         &G_context.tx_info.transaction.payload.entry_function.args.transfer;
 
     // For well-known functions, display the transaction type in human-readable format
@@ -376,7 +396,7 @@ static const token_info_t *get_token_info(const char *coin_type) {
 }
 
 int ui_prepare_tx_coin_transfer() {
-    agrs_coin_trasfer_t *transfer =
+    args_coin_transfer_t *transfer =
         &G_context.tx_info.transaction.payload.entry_function.args.coin_transfer;
     char transfer_ty_coin_address_hex[67] = {0};
 
@@ -430,6 +450,50 @@ int ui_prepare_tx_coin_transfer() {
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
 
+    snprintf(g_amount, sizeof(g_amount), "%s %.*s", info->ticker, sizeof(amount), amount);
+    PRINTF("Amount: %s\n", g_amount);
+
+    return UI_PREPARED;
+}
+
+int ui_prepare_tx_fungible_asset_transfer() {
+    args_fungible_asset_transfer_t *transfer =
+        &G_context.tx_info.transaction.payload.entry_function.args.fa_transfer;
+    char transfer_fa_coin_address_hex[67] = {0};
+
+    // For well-known functions, display the transaction type in human-readable format
+    memset(g_tx_type, 0, sizeof(g_tx_type));
+    snprintf(g_tx_type, sizeof(g_tx_type), "Fungible asset transfer");
+    PRINTF("Tx Type: %s\n", g_tx_type);
+
+    // Be sure to display at least 1 byte, even if it is zero
+    size_t leading_zeros = count_leading_zeros(transfer->fungible_asset.address, ADDRESS_LEN - 1);
+    if (0 > format_prefixed_hex(transfer->fungible_asset.address + leading_zeros,
+                                ADDRESS_LEN - leading_zeros,
+                                transfer_fa_coin_address_hex,
+                                sizeof(transfer_fa_coin_address_hex))) {
+        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
+    }
+    memset(g_struct, 0, sizeof(g_struct));
+    snprintf(g_struct, sizeof(g_struct), "%s", transfer_fa_coin_address_hex);
+    PRINTF("Coin Type: %s\n", g_struct);
+
+    memset(g_address, 0, sizeof(g_address));
+    if (0 > format_prefixed_hex(transfer->receiver, ADDRESS_LEN, g_address, sizeof(g_address))) {
+        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
+    }
+    PRINTF("Receiver: %s\n", g_address);
+
+    char amount[30] = {0};
+    if (!format_fpu64(amount, sizeof(amount), transfer->amount, 8)) {
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
+    const token_info_t *info = get_token_info(g_struct);
+    if (!info) {
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
+
+    memset(g_amount, 0, sizeof(g_amount));
     snprintf(g_amount, sizeof(g_amount), "%s %.*s", info->ticker, sizeof(amount), amount);
     PRINTF("Amount: %s\n", g_amount);
 

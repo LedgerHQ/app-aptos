@@ -456,4 +456,14 @@ int ui_display_tx_coin_transfer() {
     return ret;
 }
 
+int ui_display_tx_fungible_asset_transfer() {
+    const int ret = ui_prepare_tx_fungible_asset_transfer();
+    if (ret == UI_PREPARED) {
+        ui_flow_display(ux_display_tx_coin_transfer_flow);
+        return 0;
+    }
+
+    return ret;
+}
+
 #endif
