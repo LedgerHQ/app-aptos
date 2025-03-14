@@ -182,6 +182,8 @@ parser_status_e entry_function_payload_deserialize(buffer_t *buf, transaction_t 
         case FUNC_COIN_TRANSFER:
         case FUNC_APTOS_ACCOUNT_TRANSFER_COINS:
             return coin_transfer_function_deserialize(buf, tx);
+        case FUNC_FUNGIBLE_STORE_TRANSFER:
+            return fa_transfer_function_deserialize(buf, tx);
         default:
             return PARSING_OK;
     }
@@ -267,7 +269,7 @@ parser_status_e coin_transfer_function_deserialize(buffer_t *buf, transaction_t 
         return TYPE_TAG_UNEXPECTED_ERROR;
     }
 
-    agrs_coin_trasfer_t *coin_transfer = &payload->args.coin_transfer;
+    args_coin_transfer_t *coin_transfer = &payload->args.coin_transfer;
     // read coin struct address field
     if (!bcs_read_fixed_bytes(buf, (uint8_t *) &coin_transfer->ty_coin.address, ADDRESS_LEN)) {
         return STRUCT_ADDRESS_READ_ERROR;
@@ -335,6 +337,119 @@ parser_status_e coin_transfer_function_deserialize(buffer_t *buf, transaction_t 
     return PARSING_OK;
 }
 
+parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *tx) {
+    if (tx->payload_variant != PAYLOAD_ENTRY_FUNCTION) {
+        return PAYLOAD_UNDEFINED_ERROR;
+    }
+    entry_function_payload_t *payload = &tx->payload.entry_function;
+    if (payload->known_type != FUNC_FUNGIBLE_STORE_TRANSFER) {
+        return PAYLOAD_UNDEFINED_ERROR;
+    }
+
+    // read type args size
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &payload->args.ty_size)) {
+        return TYPE_ARGS_SIZE_READ_ERROR;
+    }
+
+    if (payload->args.ty_size != 1) {
+        return TYPE_ARGS_SIZE_UNEXPECTED_ERROR;
+    }
+
+    uint32_t ty_arg_variant = TYPE_TAG_UNDEFINED;
+    // read type tag variant
+    if (!bcs_read_u32_from_uleb128(buf, &ty_arg_variant)) {
+        return TYPE_TAG_READ_ERROR;
+    }
+    if (ty_arg_variant != TYPE_TAG_STRUCT) {
+        return TYPE_TAG_UNEXPECTED_ERROR;
+    }
+
+    // READ type Arguments
+    args_fungible_asset_transfer_t *fa_transfer = &payload->args.fa_transfer;
+    // read coin struct address field
+    if (!bcs_read_fixed_bytes(buf, (uint8_t *) &fa_transfer->ty_args.address, ADDRESS_LEN)) {
+        return STRUCT_ADDRESS_READ_ERROR;
+    }
+    // read coin struct module name len
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &fa_transfer->ty_args.module_name.len)) {
+        return STRUCT_MODULE_LEN_READ_ERROR;
+    }
+    // read coin struct module name field
+    if (!bcs_read_ptr_to_fixed_bytes(buf,
+                                     &fa_transfer->ty_args.module_name.bytes,
+                                     fa_transfer->ty_args.module_name.len)) {
+        return STRUCT_MODULE_BYTES_READ_ERROR;
+    }
+    // read coin struct name len
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &fa_transfer->ty_args.name.len)) {
+        return STRUCT_NAME_LEN_READ_ERROR;
+    }
+    // read coin struct name field
+    if (!bcs_read_ptr_to_fixed_bytes(buf,
+                                     &fa_transfer->ty_args.name.bytes,
+                                     fa_transfer->ty_args.name.len)) {
+        return STRUCT_NAME_BYTES_READ_ERROR;
+    }
+
+    // read coin struct args size
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &fa_transfer->ty_args.type_args_size)) {
+        return STRUCT_TYPE_ARGS_SIZE_READ_ERROR;
+    }
+    if (fa_transfer->ty_args.type_args_size != 0) {
+        return STRUCT_TYPE_ARGS_SIZE_UNEXPECTED_ERROR;
+    }
+
+    // READ function arguments
+    // read args size
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &payload->args.args_size)) {
+        return ARGS_SIZE_READ_ERROR;
+    }
+    if (payload->args.args_size != 3) {
+        return ARGS_SIZE_UNEXPECTED_ERROR;
+    }
+
+    uint32_t fa_store_addr_len;
+    // read fungible stor address len
+    if (!bcs_read_u32_from_uleb128(buf, &fa_store_addr_len)) {
+        return RECEIVER_ADDR_LEN_READ_ERROR;
+    }
+    if (fa_store_addr_len != ADDRESS_LEN) {
+        return WRONG_ADDRESS_LEN_ERROR;
+    }
+
+    // add fungible store address
+    if (!bcs_read_fixed_bytes(buf, (uint8_t *) &fa_transfer->fungible_asset.address, ADDRESS_LEN)) {
+        return STRUCT_ADDRESS_READ_ERROR;
+    }
+
+    uint32_t receiver_len;
+    // read receiver address len
+    if (!bcs_read_u32_from_uleb128(buf, &receiver_len)) {
+        return RECEIVER_ADDR_LEN_READ_ERROR;
+    }
+    if (receiver_len != ADDRESS_LEN) {
+        return WRONG_ADDRESS_LEN_ERROR;
+    }
+    // read receiver address field
+    if (!bcs_read_fixed_bytes(buf, (uint8_t *) &payload->args.fa_transfer.receiver, ADDRESS_LEN)) {
+        return RECEIVER_ADDR_READ_ERROR;
+    }
+    uint32_t amount_len;
+    // read amount len
+    if (!bcs_read_u32_from_uleb128(buf, &amount_len)) {
+        return AMOUNT_LEN_READ_ERROR;
+    }
+    if (amount_len != sizeof(uint64_t)) {
+        return WRONG_AMOUNT_LEN_ERROR;
+    }
+    // read amount field
+    if (!bcs_read_u64(buf, &payload->args.fa_transfer.amount)) {
+        return AMOUNT_READ_ERROR;
+    }
+
+    return PARSING_OK;
+}
+
 entry_function_known_type_t determine_function_type(transaction_t *tx) {
     if (tx->payload_variant != PAYLOAD_ENTRY_FUNCTION) {
         return FUNC_UNKNOWN;
@@ -356,6 +471,12 @@ entry_function_known_type_t determine_function_type(transaction_t *tx) {
         bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "aptos_account", 13) &&
         bcs_cmp_bytes(&tx->payload.entry_function.function_name, "transfer_coins", 14)) {
         return FUNC_APTOS_ACCOUNT_TRANSFER_COINS;
+    }
+
+    if (tx->payload.entry_function.module_id.address[ADDRESS_LEN - 1] == 0x01 &&
+        bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "primary_fungible_store", 22) &&
+        bcs_cmp_bytes(&tx->payload.entry_function.function_name, "transfer", 8)) {
+        return FUNC_FUNGIBLE_STORE_TRANSFER;
     }
 
     return FUNC_UNKNOWN;
