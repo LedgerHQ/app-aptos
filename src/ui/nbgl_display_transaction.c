@@ -126,31 +126,35 @@ int ui_display_tx_aptos_account_transfer() {
     return ret;
 }
 
+void ui_coin_transfer_flow_display() {
+    pairs[0].item = "Transaction type";
+    pairs[0].value = g_tx_type;
+    pairs[1].item = "Function";
+    pairs[1].value = g_function;
+    pairs[2].item = "Amount";
+    pairs[2].value = g_amount;
+    pairs[3].item = "To";
+    pairs[3].value = g_address;
+    pairs[4].item = "Gas fee";
+    pairs[4].value = g_gas_fee;
+
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.nbPairs = 5;
+    pair_list.pairs = pairs;
+
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &pair_list,
+                       &C_aptos_logo_64px,
+                       "Review transaction to transfer coins",
+                       NULL,
+                       "Sign transaction to transfer coins?",
+                       review_choice);
+}
+
 int ui_display_tx_coin_transfer() {
     const int ret = ui_prepare_tx_coin_transfer();
     if (ret == UI_PREPARED) {
-        pairs[0].item = "Transaction type";
-        pairs[0].value = g_tx_type;
-        pairs[1].item = "Function";
-        pairs[1].value = g_function;
-        pairs[2].item = "Amount";
-        pairs[2].value = g_amount;
-        pairs[3].item = "To";
-        pairs[3].value = g_address;
-        pairs[4].item = "Gas fee";
-        pairs[4].value = g_gas_fee;
-
-        pair_list.nbMaxLinesForValue = 0;
-        pair_list.nbPairs = 5;
-        pair_list.pairs = pairs;
-
-        nbgl_useCaseReview(TYPE_TRANSACTION,
-                           &pair_list,
-                           &C_aptos_logo_64px,
-                           "Review transaction to transfer coins",
-                           NULL,
-                           "Sign transaction?",
-                           review_choice);
+        ui_coin_transfer_flow_display();
         return 0;
     }
 
@@ -160,28 +164,7 @@ int ui_display_tx_coin_transfer() {
 int ui_display_tx_fungible_asset_transfer() {
     const int ret = ui_prepare_tx_fungible_asset_transfer();
     if (ret == UI_PREPARED) {
-        pairs[0].item = "Transaction type";
-        pairs[0].value = g_tx_type;
-        pairs[1].item = "Function";
-        pairs[1].value = g_function;
-        pairs[2].item = "Amount";
-        pairs[2].value = g_amount;
-        pairs[3].item = "To";
-        pairs[3].value = g_address;
-        pairs[4].item = "Gas fee";
-        pairs[4].value = g_gas_fee;
-
-        pair_list.nbMaxLinesForValue = 0;
-        pair_list.nbPairs = 5;
-        pair_list.pairs = pairs;
-
-        nbgl_useCaseReview(TYPE_TRANSACTION,
-                           &pair_list,
-                           &C_aptos_logo_64px,
-                           "Review transaction to transfer fungible assets",
-                           NULL,
-                           "Sign transaction?",
-                           review_choice);
+        ui_coin_transfer_flow_display();
         return 0;
     }
 

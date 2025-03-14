@@ -269,7 +269,7 @@ parser_status_e coin_transfer_function_deserialize(buffer_t *buf, transaction_t 
         return TYPE_TAG_UNEXPECTED_ERROR;
     }
 
-    agrs_coin_trasfer_t *coin_transfer = &payload->args.coin_transfer;
+    args_coin_transfer_t *coin_transfer = &payload->args.coin_transfer;
     // read coin struct address field
     if (!bcs_read_fixed_bytes(buf, (uint8_t *) &coin_transfer->ty_coin.address, ADDRESS_LEN)) {
         return STRUCT_ADDRESS_READ_ERROR;
@@ -365,7 +365,7 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     }
 
     // READ type Arguments
-    agrs_fungible_asset_trasfer_t *fa_transfer = &payload->args.fa_transfer;
+    args_fungible_asset_transfer_t *fa_transfer = &payload->args.fa_transfer;
     // read coin struct address field
     if (!bcs_read_fixed_bytes(buf, (uint8_t *) &fa_transfer->ty_args.address, ADDRESS_LEN)) {
         return STRUCT_ADDRESS_READ_ERROR;
@@ -418,7 +418,7 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     }
 
     // add fungible store address
-    if (!bcs_read_fixed_bytes(buf, (uint8_t *) &fa_transfer->fungible_asset.inner, ADDRESS_LEN)) {
+    if (!bcs_read_fixed_bytes(buf, (uint8_t *) &fa_transfer->fungible_asset.address, ADDRESS_LEN)) {
         return STRUCT_ADDRESS_READ_ERROR;
     }
 
