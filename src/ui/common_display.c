@@ -199,6 +199,13 @@ static const token_info_t TOKEN_MAPPING[] = {
      .token = "Wrapped Ether (LayerZero)",
      .coin_type =
          "0xf22bede237a07e121b56d91a491eb7bcdfd1f5907926a9e58338f964a01b17fa::asset::WETH"},
+    {.ticker = "whWETH",
+     .token = "Wrapped Ether (Wormhole)",
+     .coin_type = "0xcc8a89c8dce9693d354449f1f73e60e14e347417854f029db5bc8e7454008abb::coin::T"},
+    {.ticker = "ANI",
+     .token = "AnimeSwap Coin",
+     .coin_type =
+         "0x16fe2df00ea7dde4a63409201f7f4e536bde7bb7335526a35d05111e68aa322c::AnimeCoin::ANI"},
     {.ticker = "AMA",
      .token = "Amaterasu",
      .coin_type = "0xd0ab8c2f76cd640455db56ca758a9766a966c88f77920347aac1719edab1df5e"},
