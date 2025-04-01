@@ -22,6 +22,21 @@ endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Build with code coverage generation
+message("${CMAKE_CXX_COMPILER_ID}")
+
+if(CODE_COVERAGE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "(Apple)?[Cc]lang")
+        add_compile_options(-fprofile-instr-generate -fcoverage-mapping)
+        add_link_options(-fprofile-instr-generate -fcoverage-mapping)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+        add_compile_options(-fprofile-arcs -ftest-coverage)
+        link_libraries(gcov)
+    else()
+        message(FATAL_ERROR "Unsupported compiler used with code coveragegeneration")
+    endif()
+endif()
+
 include(extra/TxParser.cmake)
 
 add_executable(fuzz_tx_parser fuzz_tx_parser.cc)
