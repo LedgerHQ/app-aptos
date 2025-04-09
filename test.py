@@ -1,0 +1,15 @@
+from aptos_sdk.transactions import RawTransaction
+
+# Your hex string
+hex_str = "5b060100c8b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b19349856246692b46d04617a8f1d858e2fd801394ffad528a471d9d70863f355b5603000000000000000200000000000000000000000000000000000000000000000000000000000000010f64656c65676174696f6e5f706f6f6c096164645f7374616b65000220a651c7c52d64a2014379902bbc92439d196499bcc36d94ff0395aa45837c66db08378ace07000000002700000000000000640000000000000065a710680000000001"
+
+# Convert hex string to bytes
+bytes_data = bytes.fromhex(hex_str)
+
+# Deserialize the data into a transaction object
+tx = RawTransaction.from_bytes(bytes_data)
+
+# Print the transaction details
+print(tx)
+
+# You can further parse the arguments to interpret specific values (like addresses or amounts)
