@@ -29,4 +29,6 @@ parser_status_e coin_transfer_function_deserialize(buffer_t *buf, transaction_t 
 
 parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *tx);
 
+parser_status_e delegation_pool_deserialize(buffer_t *buf, transaction_t *tx);
+
 entry_function_known_type_t determine_function_type(transaction_t *tx);

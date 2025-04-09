@@ -205,4 +205,82 @@ int ui_display_tx_fungible_asset_transfer() {
 
     return ret;
 }
+
+static const char* get_delegation_title(entry_function_known_type_t function_type) {
+    switch (function_type) {
+        case FUNC_ADD_STAKE:
+            return "Review transaction to delegate APT";
+        case FUNC_UNLOCK_STAKE:
+            return "Review transaction to undelegate APT";
+        case FUNC_REACTIVATE_STAKE:
+            return "Review transaction to reactivate APT";
+        case FUNC_WITHDRAW_STAKE:
+            return "Review transaction to withdraw APT";
+        default:
+            return "Review delegation pool transaction";
+    }
+}
+
+static const char* get_delegation_sign_review(entry_function_known_type_t function_type) {
+    switch (function_type) {
+        case FUNC_ADD_STAKE:
+            return "Sign transaction to delegate APT?";
+        case FUNC_UNLOCK_STAKE:
+            return "Sign transaction to undelegate APT?";
+        case FUNC_REACTIVATE_STAKE:
+            return "Sign transaction to reactivate APT?";
+        case FUNC_WITHDRAW_STAKE:
+            return "Sign transaction to withdraw APT?";
+        default:
+            return "Sign delegation pool transaction?";
+    }
+}
+
+void ui_delegation_pool_flow_display(entry_function_known_type_t function_type) {
+    PRINTF("ui_delegation_pool_flow_display");
+    switch (function_type) {
+        case FUNC_ADD_STAKE:
+            pairs[0].item = "Delegate amount";
+            break;
+        case FUNC_UNLOCK_STAKE:
+            pairs[0].item = "Undelegate amount";
+            break;
+        case FUNC_REACTIVATE_STAKE:
+            pairs[0].item = "Reactivate stake";
+            break;
+        case FUNC_WITHDRAW_STAKE:
+            pairs[0].item = "Withdraw amount";
+            break;
+        default:
+            pairs[0].item = "Delegation pool";
+            break;
+    }
+    pairs[0].value = g_amount;
+    pairs[1].item = "Validator";
+    pairs[1].value = g_address;
+    pairs[2].item = "Gas fee";
+    pairs[2].value = g_gas_fee;
+
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.nbPairs = 3;
+    pair_list.pairs = pairs;
+
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &pair_list,
+                       &C_aptos_logo_64px,
+                       get_delegation_title(function_type),
+                       NULL,
+                       get_delegation_sign_review(function_type),
+                       review_choice);
+}
+
+int ui_display_delegation_pool_transfer(entry_function_known_type_t function_type) {
+    const int ret = ui_prepare_delegation_pool_transfer();
+    if (ret == UI_PREPARED) {
+        ui_delegation_pool_flow_display(function_type);
+        return 0;
+    }
+
+    return ret;
+}
 #endif

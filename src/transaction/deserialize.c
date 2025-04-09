@@ -19,7 +19,6 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
     if (tx_variant_parsing_status != PARSING_OK) {
         return tx_variant_parsing_status;
     }
-
     switch (tx->tx_variant) {
         case TX_RAW:
             return tx_raw_deserialize(buf, tx);
@@ -184,6 +183,11 @@ parser_status_e entry_function_payload_deserialize(buffer_t *buf, transaction_t 
             return coin_transfer_function_deserialize(buf, tx);
         case FUNC_FUNGIBLE_STORE_TRANSFER:
             return fa_transfer_function_deserialize(buf, tx);
+        case FUNC_ADD_STAKE:
+        case FUNC_UNLOCK_STAKE:
+        case FUNC_REACTIVATE_STAKE:
+        case FUNC_WITHDRAW_STAKE:
+            return delegation_pool_deserialize(buf, tx);
         default:
             return PARSING_OK;
     }
@@ -450,6 +454,65 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     return PARSING_OK;
 }
 
+parser_status_e delegation_pool_deserialize(buffer_t *buf, transaction_t *tx) {
+    if (tx->payload_variant != PAYLOAD_ENTRY_FUNCTION) {
+        return PAYLOAD_UNDEFINED_ERROR;
+    }
+    entry_function_payload_t *payload = &tx->payload.entry_function;
+    if (payload->known_type != FUNC_ADD_STAKE && payload->known_type != FUNC_UNLOCK_STAKE &&
+        payload->known_type != FUNC_REACTIVATE_STAKE &&
+        payload->known_type != FUNC_WITHDRAW_STAKE) {
+        return PAYLOAD_UNDEFINED_ERROR;
+    }
+
+    // read type args size
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &payload->args.ty_size)) {
+        return TYPE_ARGS_SIZE_READ_ERROR;
+    }
+
+    if (payload->args.ty_size != 0) {
+        return TYPE_ARGS_SIZE_UNEXPECTED_ERROR;
+    }
+
+    // read args size
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &payload->args.args_size)) {
+        return ARGS_SIZE_READ_ERROR;
+    }
+    if (payload->args.args_size != 2) {
+        return ARGS_SIZE_UNEXPECTED_ERROR;
+    }
+
+    // read args size
+    uint32_t pool_len;
+    if (!bcs_read_u32_from_uleb128(buf, &pool_len)) {
+        return RECEIVER_ADDR_LEN_READ_ERROR;
+    }
+
+    if (pool_len != ADDRESS_LEN) {
+        return WRONG_ADDRESS_LEN_ERROR;
+    }
+    //  read receiver pool field
+    if (!bcs_read_fixed_bytes(buf, (uint8_t *) &payload->args.delegation.pool, ADDRESS_LEN)) {
+        return RECEIVER_ADDR_READ_ERROR;
+    }
+
+    uint32_t amount_len;
+    // read amount len
+    if (!bcs_read_u32_from_uleb128(buf, &amount_len)) {
+        return AMOUNT_LEN_READ_ERROR;
+    }
+
+    if (amount_len != sizeof(uint64_t)) {
+        return WRONG_AMOUNT_LEN_ERROR;
+    }
+    //  read amount field
+    if (!bcs_read_u64(buf, &payload->args.delegation.amount)) {
+        return AMOUNT_READ_ERROR;
+    }
+
+    return PARSING_OK;
+}
+
 entry_function_known_type_t determine_function_type(transaction_t *tx) {
     if (tx->payload_variant != PAYLOAD_ENTRY_FUNCTION) {
         return FUNC_UNKNOWN;
@@ -477,6 +540,22 @@ entry_function_known_type_t determine_function_type(transaction_t *tx) {
         bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "primary_fungible_store", 22) &&
         bcs_cmp_bytes(&tx->payload.entry_function.function_name, "transfer", 8)) {
         return FUNC_FUNGIBLE_STORE_TRANSFER;
+    }
+
+    if (tx->payload.entry_function.module_id.address[ADDRESS_LEN - 1] == 0x01 &&
+        bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "delegation_pool", 15)) {
+        if (bcs_cmp_bytes(&tx->payload.entry_function.function_name, "add_stake", 9)) {
+            return FUNC_ADD_STAKE;
+        }
+        if (bcs_cmp_bytes(&tx->payload.entry_function.function_name, "unlock", 6)) {
+            return FUNC_UNLOCK_STAKE;
+        }
+        if (bcs_cmp_bytes(&tx->payload.entry_function.function_name, "reactivate_stake", 16)) {
+            return FUNC_REACTIVATE_STAKE;
+        }
+        if (bcs_cmp_bytes(&tx->payload.entry_function.function_name, "withdraw", 8)) {
+            return FUNC_WITHDRAW_STAKE;
+        }
     }
 
     return FUNC_UNKNOWN;

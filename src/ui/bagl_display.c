@@ -250,6 +250,13 @@ UX_STEP_NOCB(ux_display_receiver_step,
                  .title = "To",
                  .text = g_address,
              });
+// Step with title/text for receiver
+UX_STEP_NOCB(ux_display_pool_step,
+             bnnn_paging,
+             {
+                 .title = "Pool",
+                 .text = g_address,
+             });
 // Step with title/text for gas fee
 UX_STEP_NOCB(ux_display_gas_fee_step,
              bnnn_paging,
@@ -385,6 +392,26 @@ UX_FLOW(ux_display_tx_unlisted_coin_transfer_flow,
         &ux_display_approve_step,
         &ux_display_reject_step);
 
+// FLOW to display delegation pool transactions:
+// #1 screen : eye icon + "Review Transaction"
+// #2 screen : display tx type
+// #3 screen : display function name
+// #4 screen : display coin type
+// #5 screen : display pool address
+// #6 screen : display amount
+// #7 screen : display gas fee
+// #8 screen : approve button
+// #9 screen : reject button
+UX_FLOW(ux_display_tx_delegation_flow,
+        &ux_display_review_step,
+        &ux_display_tx_type_step,
+        &ux_display_function_step,
+        &ux_display_amount_step,
+        &ux_display_pool_step,
+        &ux_display_gas_fee_step,
+        &ux_display_approve_step,
+        &ux_display_reject_step);
+
 int ui_display_transaction() {
     g_validate_callback = &ui_action_validate_transaction;
 
@@ -495,6 +522,17 @@ int ui_display_tx_fungible_asset_transfer() {
         } else {
             ui_flow_display(ux_display_tx_unlisted_coin_transfer_flow);
         }
+        return 0;
+    }
+
+    return ret;
+}
+
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+int ui_display_delegation_pool_transfer(entry_function_known_type_t function_type) {
+    const int ret = ui_prepare_delegation_pool_transfer();
+    if (ret == UI_PREPARED) {
+        ui_flow_display(ux_display_tx_delegation_flow);
         return 0;
     }
 
