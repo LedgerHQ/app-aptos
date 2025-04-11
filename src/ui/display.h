@@ -9,6 +9,7 @@ extern char g_gas_fee[30];
 extern char g_struct[120];
 extern char g_function[120];
 extern char g_amount[30];
+extern int g_is_token_listed;
 
 /**
  * Display address on the device and ask confirmation to export.
