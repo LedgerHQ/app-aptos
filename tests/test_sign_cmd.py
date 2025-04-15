@@ -410,8 +410,8 @@ def test_sign_fa_tx(firmware, backend, navigator, test_name):
 
 
 # # In this test we send to the device a transaction to sign and validate it on screen
-# # The transaction is Fungible Asset Tokens and should be Clear Signed
-def test_sign_staking(firmware, backend, navigator, test_name):
+# # The transaction is a Staking transaction and should be Clear Signed
+def test_sign_staking_aptos(firmware, backend, navigator, test_name):
     # Use the app interface instead of raw interface
     client = AptosCommandSender(backend)
     # The path used for this entire test
@@ -433,6 +433,318 @@ def test_sign_staking(firmware, backend, navigator, test_name):
     payload = EntryFunction.natural(
         "0x1::delegation_pool",
         "add_stake",
+        [TypeTag(StructTag.from_str("0x1::aptos_coin::AptosCoin"))],
+        [
+            TransactionArgument(pool, Serializer.struct),
+            TransactionArgument(12345, Serializer.u64),
+        ],
+    )
+
+    # Create the raw transaction (TX_RAW)
+    gas_unit_price = int(fees/max_gas_amount)
+    txn = RawTransaction(
+        sender=sender,
+        sequence_number=sequence_number,
+        payload=TransactionPayload(payload),
+        max_gas_amount=max_gas_amount,
+        gas_unit_price=gas_unit_price,
+        expiration_timestamps_secs=expiration_timestamp,
+        chain_id=1,
+    )
+    # Serialize the transaction
+    serializer = Serializer()
+    txn.serialize(serializer)
+    transaction = serializer.output()
+    # This is a salt required by the Nano App to make sure that the payload comes from Ledger Live host
+    transaction = bytes.fromhex("b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b193" + transaction.hex())
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=transaction):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    _, sig, _ = unpack_sign_tx_response(response)
+    assert check_signature_validity(public_key, sig, transaction)
+
+# # In this test we send to the device a transaction to sign and validate it on screen
+# # The transaction is Staking transaction of the Aptos Launch Token and should be Blind Signed
+def test_sign_staking_token(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = AptosCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/637'/1'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    rapdu = client.get_public_key(path=path)
+    _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    # Create the transaction that will be sent to the device for signing
+    sender = AccountAddress.from_str("0x8F13f355F3aF444BD356ADEAAAF01235A7817D6A4417F5c9FA3D74A68F7b7AFD")
+    pool =  AccountAddress.from_str("0x8F13f355F3aF444BD356ADEAAAF01235A7817D6A4417F5c9FA3D74A68F7b7AFD")
+    max_gas_amount = 100
+    fees = 6 * max_gas_amount
+
+    # Transaction parameters
+    sequence_number = 0
+    expiration_timestamp = 0
+    payload = EntryFunction.natural(
+        "0x1::delegation_pool",
+        "add_stake",
+        [TypeTag(StructTag.from_str("0xd0b4efb4be7c3508d9a26a9b5405cf9f860d0b9e5fe2f498b90e68b8d2cedd3e::aptos_launch_token::AptosLaunchToken"))],
+        [
+            TransactionArgument(pool, Serializer.struct),
+            TransactionArgument(12345, Serializer.u64),
+        ],
+    )
+
+    # Create the raw transaction (TX_RAW)
+    gas_unit_price = int(fees/max_gas_amount)
+    txn = RawTransaction(
+        sender=sender,
+        sequence_number=sequence_number,
+        payload=TransactionPayload(payload),
+        max_gas_amount=max_gas_amount,
+        gas_unit_price=gas_unit_price,
+        expiration_timestamps_secs=expiration_timestamp,
+        chain_id=1,
+    )
+    # Serialize the transaction
+    serializer = Serializer()
+    txn.serialize(serializer)
+    transaction = serializer.output()
+    # This is a salt required by the Nano App to make sure that the payload comes from Ledger Live host
+    transaction = bytes.fromhex("b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b193" + transaction.hex())
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=transaction):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Allow",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part0",
+                                                      screen_change_after_last_instruction=False)
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part1")
+        else:
+            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
+                                           test_name + "/part0",
+                                           [NavInsID.USE_CASE_CHOICE_CONFIRM,
+                                            NavInsID.USE_CASE_STATUS_DISMISS,
+                                            NavInsID.USE_CASE_CHOICE_REJECT,
+                                            NavInsID.INFO_HEADER_TAP,
+                                            NavInsID.NAVIGATION_HEADER_TAP],
+                                           screen_change_after_last_instruction=False)
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name + "/part1")
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    _, sig, _ = unpack_sign_tx_response(response)
+    assert check_signature_validity(public_key, sig, transaction)
+
+    # # In this test we send to the device a transaction to sign and validate it on screen
+
+# # In this test we send to the device a transaction to sign and validate it on screen
+# # The transaction is a Unlock stake transaction and should be Clear Signed
+def test_sign_unlocking_aptos(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = AptosCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/637'/1'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    rapdu = client.get_public_key(path=path)
+    _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    # Create the transaction that will be sent to the device for signing
+    sender = AccountAddress.from_str("0x8F13f355F3aF444BD356ADEAAAF01235A7817D6A4417F5c9FA3D74A68F7b7AFD")
+    pool =  AccountAddress.from_str("0x8F13f355F3aF444BD356ADEAAAF01235A7817D6A4417F5c9FA3D74A68F7b7AFD")
+    max_gas_amount = 100
+    fees = 6 * max_gas_amount
+
+    # Transaction parameters
+    sequence_number = 0
+    expiration_timestamp = 0
+    payload = EntryFunction.natural(
+        "0x1::delegation_pool",
+        "unlock",
+        [TypeTag(StructTag.from_str("0x1::aptos_coin::AptosCoin"))],
+        [
+            TransactionArgument(pool, Serializer.struct),
+            TransactionArgument(12345, Serializer.u64),
+        ],
+    )
+
+    print("payload", payload)
+
+    # Create the raw transaction (TX_RAW)
+    gas_unit_price = int(fees/max_gas_amount)
+    txn = RawTransaction(
+        sender=sender,
+        sequence_number=sequence_number,
+        payload=TransactionPayload(payload),
+        max_gas_amount=max_gas_amount,
+        gas_unit_price=gas_unit_price,
+        expiration_timestamps_secs=expiration_timestamp,
+        chain_id=1,
+    )
+    # Serialize the transaction
+    serializer = Serializer()
+    txn.serialize(serializer)
+    transaction = serializer.output()
+    # This is a salt required by the Nano App to make sure that the payload comes from Ledger Live host
+    transaction = bytes.fromhex("b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b193" + transaction.hex())
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=transaction):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    _, sig, _ = unpack_sign_tx_response(response)
+    assert check_signature_validity(public_key, sig, transaction)
+
+# # In this test we send to the device a transaction to sign and validate it on screen
+# # The transaction is a reactivate stake transaction and should be Clear Signed
+def test_sign_reactivate_aptos(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = AptosCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/637'/1'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    rapdu = client.get_public_key(path=path)
+    _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    # Create the transaction that will be sent to the device for signing
+    sender = AccountAddress.from_str("0x8F13f355F3aF444BD356ADEAAAF01235A7817D6A4417F5c9FA3D74A68F7b7AFD")
+    pool =  AccountAddress.from_str("0x8F13f355F3aF444BD356ADEAAAF01235A7817D6A4417F5c9FA3D74A68F7b7AFD")
+    max_gas_amount = 100
+    fees = 6 * max_gas_amount
+
+    # Transaction parameters
+    sequence_number = 0
+    expiration_timestamp = 0
+    payload = EntryFunction.natural(
+        "0x1::delegation_pool",
+        "reactivate_stake",
+        [TypeTag(StructTag.from_str("0x1::aptos_coin::AptosCoin"))],
+        [
+            TransactionArgument(pool, Serializer.struct),
+            TransactionArgument(12345, Serializer.u64),
+        ],
+    )
+
+    print("payload", payload)
+
+    # Create the raw transaction (TX_RAW)
+    gas_unit_price = int(fees/max_gas_amount)
+    txn = RawTransaction(
+        sender=sender,
+        sequence_number=sequence_number,
+        payload=TransactionPayload(payload),
+        max_gas_amount=max_gas_amount,
+        gas_unit_price=gas_unit_price,
+        expiration_timestamps_secs=expiration_timestamp,
+        chain_id=1,
+    )
+    # Serialize the transaction
+    serializer = Serializer()
+    txn.serialize(serializer)
+    transaction = serializer.output()
+    # This is a salt required by the Nano App to make sure that the payload comes from Ledger Live host
+    transaction = bytes.fromhex("b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b193" + transaction.hex())
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=transaction):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    _, sig, _ = unpack_sign_tx_response(response)
+    assert check_signature_validity(public_key, sig, transaction)
+
+# # In this test we send to the device a transaction to sign and validate it on screen
+# # The transaction is a reactivate stake transaction and should be Clear Signed
+def test_sign_withdraw_aptos(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = AptosCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/637'/1'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    rapdu = client.get_public_key(path=path)
+    _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    # Create the transaction that will be sent to the device for signing
+    sender = AccountAddress.from_str("0x8F13f355F3aF444BD356ADEAAAF01235A7817D6A4417F5c9FA3D74A68F7b7AFD")
+    pool =  AccountAddress.from_str("0x8F13f355F3aF444BD356ADEAAAF01235A7817D6A4417F5c9FA3D74A68F7b7AFD")
+    max_gas_amount = 100
+    fees = 6 * max_gas_amount
+
+    # Transaction parameters
+    sequence_number = 0
+    expiration_timestamp = 0
+    payload = EntryFunction.natural(
+        "0x1::delegation_pool",
+        "withdraw",
         [TypeTag(StructTag.from_str("0x1::aptos_coin::AptosCoin"))],
         [
             TransactionArgument(pool, Serializer.struct),
