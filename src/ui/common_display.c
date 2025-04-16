@@ -43,6 +43,7 @@ char g_gas_fee[30];
 char g_struct[120];
 char g_function[120];
 char g_amount[30];
+int g_is_token_listed;
 
 #define MAX_COIN_TYPE_LEN 110
 #define MAX_TOKEN_LEN     30
@@ -453,13 +454,15 @@ int ui_prepare_tx_coin_transfer() {
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
     const token_info_t *info = get_token_info(g_struct);
-    if (!info) {
-        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    if (info) {
+        snprintf(g_amount, sizeof(g_amount), "%s %.*s", info->ticker, sizeof(amount), amount);
+        g_is_token_listed = 1;
+    } else {
+        snprintf(g_amount, sizeof(g_amount), "%.*s", sizeof(amount), amount);
+        g_is_token_listed = 0;
     }
 
-    snprintf(g_amount, sizeof(g_amount), "%s %.*s", info->ticker, sizeof(amount), amount);
     PRINTF("Amount: %s\n", g_amount);
-
     return UI_PREPARED;
 }
 
@@ -496,12 +499,13 @@ int ui_prepare_tx_fungible_asset_transfer() {
         return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
     }
     const token_info_t *info = get_token_info(g_struct);
-    if (!info) {
-        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    if (info) {
+        snprintf(g_amount, sizeof(g_amount), "%s %.*s", info->ticker, sizeof(amount), amount);
+        g_is_token_listed = 1;
+    } else {
+        snprintf(g_amount, sizeof(g_amount), "%.*s", sizeof(amount), amount);
+        g_is_token_listed = 0;
     }
-
-    memset(g_amount, 0, sizeof(g_amount));
-    snprintf(g_amount, sizeof(g_amount), "%s %.*s", info->ticker, sizeof(amount), amount);
     PRINTF("Amount: %s\n", g_amount);
 
     return UI_PREPARED;

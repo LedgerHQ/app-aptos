@@ -126,7 +126,7 @@ int ui_display_tx_aptos_account_transfer() {
     return ret;
 }
 
-void ui_coin_transfer_flow_display() {
+void ui_listed_coin_transfer_flow_display() {
     pairs[0].item = "Transaction type";
     pairs[0].value = g_tx_type;
     pairs[1].item = "Function";
@@ -151,10 +151,41 @@ void ui_coin_transfer_flow_display() {
                        review_choice);
 }
 
+void ui_unlisted_coin_transfer_flow_display() {
+    pairs[0].item = "Transaction type";
+    pairs[0].value = g_tx_type;
+    pairs[1].item = "Function";
+    pairs[1].value = g_function;
+    pairs[2].item = "Coin Type";
+    pairs[2].value = g_struct;
+    pairs[3].item = "Amount";
+    pairs[3].value = g_amount;
+    pairs[4].item = "To";
+    pairs[4].value = g_address;
+    pairs[5].item = "Gas fee";
+    pairs[5].value = g_gas_fee;
+
+    pair_list.nbMaxLinesForValue = 0;
+    pair_list.nbPairs = 6;
+    pair_list.pairs = pairs;
+
+    nbgl_useCaseReview(TYPE_TRANSACTION,
+                       &pair_list,
+                       &C_aptos_logo_64px,
+                       "Review transaction to transfer coins",
+                       NULL,
+                       "Sign transaction to transfer coins?",
+                       review_choice);
+}
+
 int ui_display_tx_coin_transfer() {
     const int ret = ui_prepare_tx_coin_transfer();
     if (ret == UI_PREPARED) {
-        ui_coin_transfer_flow_display();
+        if (g_is_token_listed) {
+            ui_listed_coin_transfer_flow_display();
+        } else {
+            ui_unlisted_coin_transfer_flow_display();
+        }
         return 0;
     }
 
@@ -164,7 +195,11 @@ int ui_display_tx_coin_transfer() {
 int ui_display_tx_fungible_asset_transfer() {
     const int ret = ui_prepare_tx_fungible_asset_transfer();
     if (ret == UI_PREPARED) {
-        ui_coin_transfer_flow_display();
+        if (g_is_token_listed) {
+            ui_listed_coin_transfer_flow_display();
+        } else {
+            ui_unlisted_coin_transfer_flow_display();
+        }
         return 0;
     }
 

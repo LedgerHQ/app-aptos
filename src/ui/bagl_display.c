@@ -229,6 +229,13 @@ UX_STEP_NOCB(ux_display_function_step,
                  .title = "Function",
                  .text = g_function,
              });
+// Step with title/text for coin type
+UX_STEP_NOCB(ux_display_coin_type_step,
+             bnnn_paging,
+             {
+                 .title = "Coin Type",
+                 .text = g_struct,
+             });
 // Step with title/text for amount
 UX_STEP_NOCB(ux_display_amount_step,
              bnnn_paging,
@@ -342,16 +349,36 @@ UX_FLOW(ux_display_tx_aptos_account_transfer_flow,
 // #1 screen : eye icon + "Review Transaction"
 // #2 screen : display tx type
 // #3 screen : display function name
-// #4 screen : display coin type
+// #4 screen : display amount with appropriate Ticker
 // #5 screen : display destination address
-// #6 screen : display amount
-// #7 screen : display gas fee
-// #8 screen : approve button
-// #9 screen : reject button
-UX_FLOW(ux_display_tx_coin_transfer_flow,
+// #6 screen : display gas fee
+// #7 screen : approve button
+// #8 screen : reject button
+UX_FLOW(ux_display_tx_listed_coin_transfer_flow,
         &ux_display_review_step,
         &ux_display_tx_type_step,
         &ux_display_function_step,
+        &ux_display_amount_step,
+        &ux_display_receiver_step,
+        &ux_display_gas_fee_step,
+        &ux_display_approve_step,
+        &ux_display_reject_step);
+
+// FLOW to display coin_transfer transaction information:
+// #1 screen : eye icon + "Review Transaction"
+// #2 screen : display tx type
+// #3 screen : display function name
+// #4 screen : display coin type
+// #5 screen : display amount
+// #6 screen : display destination address
+// #7 screen : display gas fee
+// #8 screen : approve button
+// #9 screen : reject button
+UX_FLOW(ux_display_tx_unlisted_coin_transfer_flow,
+        &ux_display_review_step,
+        &ux_display_tx_type_step,
+        &ux_display_function_step,
+        &ux_display_coin_type_step,
         &ux_display_amount_step,
         &ux_display_receiver_step,
         &ux_display_gas_fee_step,
@@ -449,7 +476,11 @@ int ui_display_tx_aptos_account_transfer() {
 int ui_display_tx_coin_transfer() {
     const int ret = ui_prepare_tx_coin_transfer();
     if (ret == UI_PREPARED) {
-        ui_flow_display(ux_display_tx_coin_transfer_flow);
+        if (g_is_token_listed) {
+            ui_flow_display(ux_display_tx_listed_coin_transfer_flow);
+        } else {
+            ui_flow_display(ux_display_tx_unlisted_coin_transfer_flow);
+        }
         return 0;
     }
 
@@ -459,7 +490,11 @@ int ui_display_tx_coin_transfer() {
 int ui_display_tx_fungible_asset_transfer() {
     const int ret = ui_prepare_tx_fungible_asset_transfer();
     if (ret == UI_PREPARED) {
-        ui_flow_display(ux_display_tx_coin_transfer_flow);
+        if (g_is_token_listed) {
+            ui_flow_display(ux_display_tx_listed_coin_transfer_flow);
+        } else {
+            ui_flow_display(ux_display_tx_unlisted_coin_transfer_flow);
+        }
         return 0;
     }
 
