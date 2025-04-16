@@ -284,3 +284,120 @@ def test_sign_long_raw_msg(firmware, backend, navigator, test_name, disable_blin
     response = client.get_async_response().data
     _, sig, _ = unpack_sign_tx_response(response)
     assert check_signature_validity(public_key, sig, message)
+
+# In this test we send to the device a transaction to sign and validate it on screen
+# The transaction is Legacy Tokens to be Clear Signed and is listed in the app
+def test_sign_listed_legacy_tokens(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = AptosCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/637'/1'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    rapdu = client.get_public_key(path=path)
+    _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    # Create the transaction that will be sent to the device for signing
+    transaction = bytes.fromhex("b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b1934e5e65d5c7a3191e4310ecd210e8f0ff53823189123b47086d928bd574a573d114000000000000000200000000000000000000000000000000000000000000000000000000000000010d6170746f735f6163636f756e740e7472616e736665725f636f696e730107d11107bdf0d6d7040c6c0bfbdecb6545191fdf13e8d8d259952f53e1713f61b50b7374616b65645f636f696e0b5374616b65644170746f73000220a0d8abc262e3321f87d745bd5d687e8f3fb14c87d48f840b6b56867df0026ec808a0936c02000000000b0000000000000064000000000000005459d0")
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=transaction):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    _, sig, _ = unpack_sign_tx_response(response)
+    assert check_signature_validity(public_key, sig, transaction)
+
+# In this test we send to the device a transaction to sign and validate it on screen
+# The transaction is Legacy Tokens to be Clear Signed and is whitelisted in the app
+def test_sign_unlisted_legacy_tokens(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = AptosCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/637'/1'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    rapdu = client.get_public_key(path=path)
+    _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    # Create the transaction that will be sent to the device for signing
+    transaction = bytes.fromhex("b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b1934e5e65d5c7a3191e4310ecd210e8f0ff53823189123b47086d928bd574a573d114000000000000000200000000000000000000000000000000000000000000000000000000000000010d6170746f735f6163636f756e740e7472616e736665725f636f696e730107804cef4821e11c55e87f2e9ec7dfc0d31d297cd34d20bfb2ae166e5069b40fe20b6c65646765725f636f696e0b4c65646765724170746f73000220a0d8abc262e3321f87d745bd5d687e8f3fb14c87d48f840b6b56867df0026ec808a0936c02000000000b0000000000000064000000000000005459d0")
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=transaction):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    _, sig, _ = unpack_sign_tx_response(response)
+    assert check_signature_validity(public_key, sig, transaction)
+
+# # In this test we send to the device a transaction to sign and validate it on screen
+# # The transaction is Fungible Asset Tokens and should be Clear Signed
+def test_sign_fa_tx(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = AptosCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/637'/1'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    rapdu = client.get_public_key(path=path)
+    _, public_key, _, _ = unpack_get_public_key_response(rapdu.data)
+
+    # Create the transaction that will be sent to the device for signing
+    transaction = bytes.fromhex("b5e97db07fa0bd0e5598aa3643a9bc6f6693bddc1a9fec9e674a461eaa00b1938f13f355f3af444bd356adeaaaf01235a7817d6a4417f5c9fa3d74a68f7b7afd0000000000000000020000000000000000000000000000000000000000000000000000000000000001167072696d6172795f66756e6769626c655f73746f7265087472616e73666572010700000000000000000000000000000000000000000000000000000000000000010e66756e6769626c655f6173736574084d65746164617461000320357b0b74bc833e95a115ad22604854d6b0fca151cecd94111770e5d6ffc9dc2b207be51d04d3a482fa056bc094bc5eadad005aaf823a95269410f08730f0d03cb40840420f000000000009000000000000006400000000000000000000000000000001")
+    
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=transaction):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                      [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                       NavInsID.USE_CASE_STATUS_DISMISS],
+                                                      "Hold to sign",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    _, sig, _ = unpack_sign_tx_response(response)
+    assert check_signature_validity(public_key, sig, transaction)
