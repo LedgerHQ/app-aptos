@@ -19,13 +19,10 @@ jobs:
       - name: Clone
         uses: actions/checkout@v2
 
-      - name: Set Target
-        run: |
-          echo "TARGET_NAME=TARGET_NANOX" >> $GITHUB_ENV
-
       - name: Build with Clang Static Analyzer
         run: |
           make clean
+          echo "TARGET_NAME=TARGET_NANOX" >> $GITHUB_ENV
           scan-build --use-cc=clang -analyze-headers -enable-checker security -enable-checker unix -enable-checker valist -o scan-build --status-bugs make default
 
       - name: Upload scan result
