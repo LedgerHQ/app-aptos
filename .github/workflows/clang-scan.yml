@@ -19,6 +19,10 @@ jobs:
       - name: Clone
         uses: actions/checkout@v2
 
+      - name: Set Target
+        run: |
+          echo "TARGET_NAME=TARGET_NANOX" >> $GITHUB_ENV
+
       - name: Build with Clang Static Analyzer
         run: |
           make clean
