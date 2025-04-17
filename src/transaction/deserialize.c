@@ -184,6 +184,11 @@ parser_status_e entry_function_payload_deserialize(buffer_t *buf, transaction_t 
             return coin_transfer_function_deserialize(buf, tx);
         case FUNC_FUNGIBLE_STORE_TRANSFER:
             return fa_transfer_function_deserialize(buf, tx);
+        case FUNC_ADD_STAKE:
+        case FUNC_UNLOCK_STAKE:
+        case FUNC_REACTIVATE_STAKE:
+        case FUNC_WITHDRAW_STAKE:
+            return delegation_pool_deserialize(buf, tx);
         default:
             return PARSING_OK;
     }
@@ -450,6 +455,108 @@ parser_status_e fa_transfer_function_deserialize(buffer_t *buf, transaction_t *t
     return PARSING_OK;
 }
 
+parser_status_e delegation_pool_deserialize(buffer_t *buf, transaction_t *tx) {
+    if (tx->payload_variant != PAYLOAD_ENTRY_FUNCTION) {
+        return PAYLOAD_UNDEFINED_ERROR;
+    }
+    entry_function_payload_t *payload = &tx->payload.entry_function;
+    if (payload->known_type != FUNC_ADD_STAKE && payload->known_type != FUNC_UNLOCK_STAKE &&
+        payload->known_type != FUNC_REACTIVATE_STAKE &&
+        payload->known_type != FUNC_WITHDRAW_STAKE) {
+        return PAYLOAD_UNDEFINED_ERROR;
+    }
+
+    // read type args size
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &payload->args.ty_size)) {
+        return TYPE_ARGS_SIZE_READ_ERROR;
+    }
+
+    if (payload->args.ty_size != 1) {
+        return TYPE_ARGS_SIZE_UNEXPECTED_ERROR;
+    }
+
+    uint32_t ty_arg_variant = TYPE_TAG_UNDEFINED;
+    // read type tag variant
+    if (!bcs_read_u32_from_uleb128(buf, &ty_arg_variant)) {
+        return TYPE_TAG_READ_ERROR;
+    }
+
+    if (ty_arg_variant != TYPE_TAG_STRUCT) {
+        return TYPE_TAG_UNEXPECTED_ERROR;
+    }
+
+    args_delegation_pool_transfer_t *delegation = &payload->args.delegation;
+    // read coin struct address field
+    if (!bcs_read_fixed_bytes(buf, (uint8_t *) &delegation->ty_args.address, ADDRESS_LEN)) {
+        return STRUCT_ADDRESS_READ_ERROR;
+    }
+    // read coin struct module name len
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &delegation->ty_args.module_name.len)) {
+        return STRUCT_MODULE_LEN_READ_ERROR;
+    }
+    // read coin struct module name field
+    if (!bcs_read_ptr_to_fixed_bytes(buf,
+                                     &delegation->ty_args.module_name.bytes,
+                                     delegation->ty_args.module_name.len)) {
+        return STRUCT_MODULE_BYTES_READ_ERROR;
+    }
+    // read coin struct name len
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &delegation->ty_args.name.len)) {
+        return STRUCT_NAME_LEN_READ_ERROR;
+    }
+    // read coin struct name field
+    if (!bcs_read_ptr_to_fixed_bytes(buf,
+                                     &delegation->ty_args.name.bytes,
+                                     delegation->ty_args.name.len)) {
+        return STRUCT_NAME_BYTES_READ_ERROR;
+    }
+    // read coin struct args size
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &delegation->ty_args.type_args_size)) {
+        return STRUCT_TYPE_ARGS_SIZE_READ_ERROR;
+    }
+    if (delegation->ty_args.type_args_size != 0) {
+        return STRUCT_TYPE_ARGS_SIZE_UNEXPECTED_ERROR;
+    }
+
+    // read args size
+    if (!bcs_read_u32_from_uleb128(buf, (uint32_t *) &payload->args.args_size)) {
+        return ARGS_SIZE_READ_ERROR;
+    }
+    if (payload->args.args_size != 2) {
+        return ARGS_SIZE_UNEXPECTED_ERROR;
+    }
+
+    // read args size
+    uint32_t pool_len;
+    if (!bcs_read_u32_from_uleb128(buf, &pool_len)) {
+        return RECEIVER_ADDR_LEN_READ_ERROR;
+    }
+
+    if (pool_len != ADDRESS_LEN) {
+        return WRONG_ADDRESS_LEN_ERROR;
+    }
+    //  read receiver pool field
+    if (!bcs_read_fixed_bytes(buf, (uint8_t *) &payload->args.delegation.pool, ADDRESS_LEN)) {
+        return RECEIVER_ADDR_READ_ERROR;
+    }
+
+    uint32_t amount_len;
+    // read amount len
+    if (!bcs_read_u32_from_uleb128(buf, &amount_len)) {
+        return AMOUNT_LEN_READ_ERROR;
+    }
+
+    if (amount_len != sizeof(uint64_t)) {
+        return WRONG_AMOUNT_LEN_ERROR;
+    }
+    //  read amount field
+    if (!bcs_read_u64(buf, &payload->args.delegation.amount)) {
+        return AMOUNT_READ_ERROR;
+    }
+
+    return PARSING_OK;
+}
+
 entry_function_known_type_t determine_function_type(transaction_t *tx) {
     if (tx->payload_variant != PAYLOAD_ENTRY_FUNCTION) {
         return FUNC_UNKNOWN;
@@ -477,6 +584,22 @@ entry_function_known_type_t determine_function_type(transaction_t *tx) {
         bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "primary_fungible_store", 22) &&
         bcs_cmp_bytes(&tx->payload.entry_function.function_name, "transfer", 8)) {
         return FUNC_FUNGIBLE_STORE_TRANSFER;
+    }
+
+    if (tx->payload.entry_function.module_id.address[ADDRESS_LEN - 1] == 0x01 &&
+        bcs_cmp_bytes(&tx->payload.entry_function.module_id.name, "delegation_pool", 15)) {
+        if (bcs_cmp_bytes(&tx->payload.entry_function.function_name, "add_stake", 9)) {
+            return FUNC_ADD_STAKE;
+        }
+        if (bcs_cmp_bytes(&tx->payload.entry_function.function_name, "unlock", 6)) {
+            return FUNC_UNLOCK_STAKE;
+        }
+        if (bcs_cmp_bytes(&tx->payload.entry_function.function_name, "reactivate_stake", 16)) {
+            return FUNC_REACTIVATE_STAKE;
+        }
+        if (bcs_cmp_bytes(&tx->payload.entry_function.function_name, "withdraw", 8)) {
+            return FUNC_WITHDRAW_STAKE;
+        }
     }
 
     return FUNC_UNKNOWN;

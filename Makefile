@@ -51,8 +51,8 @@ APPNAME = "Aptos"
 
 # Application version
 APPVERSION_M = 0
-APPVERSION_N = 8
-APPVERSION_P = 13
+APPVERSION_N = 9
+APPVERSION_P = 14
 APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -81,7 +81,7 @@ VARIANT_PARAM = COIN
 VARIANT_VALUES = APTOS
 
 # Enabling DEBUG flag will enable PRINTF and disable optimizations
-#DEBUG = 1
+DEBUG = 1
 
 ########################################
 #     Application custom permissions   #
