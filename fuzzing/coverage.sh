@@ -8,6 +8,14 @@ BUILDDIR="$SCRIPTDIR/build"
 CORPUSDIR="$SCRIPTDIR/corpus"
 HTMLCOVDIR="$SCRIPTDIR/html-coverage"
 
+echo "Generating code coverage reports from fuzzing results"
+echo "SCRIPTDIR: $SCRIPTDIR"
+ls -l "$SCRIPTDIR"
+echo "BUILDDIR: $BUILDDIR"
+ls -l "$BUILDDIR"
+echo "CORPUSDIR: $CORPUSDIR"
+ls -l "$CORPUSDIR"
+
 # Compile the fuzzer with code coverage support
 rm -rf "$BUILDDIR" "$HTMLCOVDIR"
 cmake -DCMAKE_C_COMPILER=/usr/bin/clang -DCMAKE_CXX_COMPILER=/usr/bin/clang++ -DCODE_COVERAGE=1 -B"$BUILDDIR" -H.
