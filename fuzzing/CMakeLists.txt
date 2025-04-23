@@ -33,7 +33,7 @@ if (NOT DEFINED ENV{LIB_FUZZING_ENGINE})
   elseif (SANITIZER MATCHES "memory")
     set(COMPILATION_FLAGS ${COMPILATION_FLAGS} -fsanitize=fuzzer,memory,undefined -fsanitize-memory-track-origins -fsanitize=fuzzer-no-link)
   else()
-    message(FATAL_ERROR "Unkown sanitizer type. It must be set to `address` or `memory`.")
+    message(FATAL_ERROR "Unknown sanitizer type. It must be set to `address` or `memory`.")
   endif()
 else()
 	set(COMPILATION_FLAGS "$ENV{LIB_FUZZING_ENGINE} $ENV{CFLAGS} ${CUSTOM_C_FLAGS}")
@@ -61,6 +61,6 @@ target_compile_options(fuzz_tx_parser
 )
 
 target_link_libraries(fuzz_tx_parser
-    PRIVATE COMPILATION_FLAGS
+    PRIVATE ${COMPILATION_FLAGS}
     PUBLIC txparser
 )
