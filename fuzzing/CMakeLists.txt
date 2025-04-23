@@ -57,10 +57,10 @@ include(extra/TxParser.cmake)
 add_executable(fuzz_tx_parser fuzz_tx_parser.cc)
 
 target_compile_options(fuzz_tx_parser
-    PRIVATE ${COMPILATION_FLAGS}
+    PRIVATE COMPILATION_FLAGS
 )
 
 target_link_libraries(fuzz_tx_parser
-    PRIVATE ${COMPILATION_FLAGS}
+    PRIVATE COMPILATION_FLAGS
     PUBLIC txparser
 )
