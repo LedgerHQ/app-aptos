@@ -396,12 +396,11 @@ UX_FLOW(ux_display_tx_unlisted_coin_transfer_flow,
 // #1 screen : eye icon + "Review Transaction"
 // #2 screen : display tx type
 // #3 screen : display function name
-// #4 screen : display coin type
-// #5 screen : display pool address
-// #6 screen : display amount
-// #7 screen : display gas fee
-// #8 screen : approve button
-// #9 screen : reject button
+// #4 screen : display pool address
+// #5 screen : display amount
+// #6 screen : display gas fee
+// #7 screen : approve button
+// #8 screen : reject button
 UX_FLOW(ux_display_tx_delegation_flow,
         &ux_display_review_step,
         &ux_display_tx_type_step,
