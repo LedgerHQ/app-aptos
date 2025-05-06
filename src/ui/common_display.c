@@ -320,6 +320,11 @@ int ui_prepare_transaction() {
     return UI_PREPARED;
 }
 
+static int is_coin_type_aptos(type_tag_struct_t *coin_type) {
+    return (memcmp(coin_type->name.bytes, "AptosCoin", coin_type->name.len) == 0 &&
+            memcmp(coin_type->module_name.bytes, "aptos_coin", coin_type->module_name.len) == 0);
+}
+
 int ui_prepare_entry_function() {
     entry_function_payload_t *function = &G_context.tx_info.transaction.payload.entry_function;
     char function_module_id_address_hex[67] = {0};
@@ -351,6 +356,11 @@ int ui_prepare_entry_function() {
             return ui_display_tx_coin_transfer();
         case FUNC_FUNGIBLE_STORE_TRANSFER:
             return ui_display_tx_fungible_asset_transfer();
+        case FUNC_ADD_STAKE:
+        case FUNC_UNLOCK_STAKE:
+        case FUNC_REACTIVATE_STAKE:
+        case FUNC_WITHDRAW_STAKE:
+            return ui_display_delegation_pool_transfer(function->known_type);
         default:
             memset(g_tx_type, 0, sizeof(g_tx_type));
             snprintf(g_tx_type, sizeof(g_tx_type), "Function call");
@@ -425,10 +435,7 @@ int ui_prepare_tx_coin_transfer() {
 
     // If the coin type is AptosCoin we ought specify snprintf, as the coin address
     // can have an arbitrary number of leading zeros
-    if (memcmp(transfer->ty_coin.name.bytes, "AptosCoin", transfer->ty_coin.name.len) == 0 &&
-        memcmp(transfer->ty_coin.module_name.bytes,
-               "aptos_coin",
-               transfer->ty_coin.module_name.len) == 0) {
+    if (is_coin_type_aptos(&transfer->ty_coin)) {
         snprintf(g_struct, sizeof(g_struct), "0x1::aptos_coin::AptosCoin");
     } else {
         snprintf(g_struct,
@@ -506,6 +513,33 @@ int ui_prepare_tx_fungible_asset_transfer() {
         snprintf(g_amount, sizeof(g_amount), "%.*s", sizeof(amount), amount);
         g_is_token_listed = 0;
     }
+    PRINTF("Amount: %s\n", g_amount);
+
+    return UI_PREPARED;
+}
+
+int ui_prepare_delegation_pool_transfer() {
+    args_delegation_pool_transfer_t *delegation =
+        &G_context.tx_info.transaction.payload.entry_function.args.delegation;
+
+    // For well-known functions, display the transaction type in human-readable format
+    memset(g_tx_type, 0, sizeof(g_tx_type));
+    snprintf(g_tx_type, sizeof(g_tx_type), "Delegation pool transfer");
+    PRINTF("Tx Type: %s\n", g_tx_type);
+
+    memset(g_address, 0, sizeof(g_address));
+    if (0 > format_prefixed_hex(delegation->pool, ADDRESS_LEN, g_address, sizeof(g_address))) {
+        return io_send_sw(SW_DISPLAY_ADDRESS_FAIL);
+    }
+    PRINTF("Pool: %s\n", g_address);
+
+    memset(g_amount, 0, sizeof(g_amount));
+    char amount[30] = {0};
+    if (!format_fpu64(amount, sizeof(amount), delegation->amount, 8)) {
+        return io_send_sw(SW_DISPLAY_AMOUNT_FAIL);
+    }
+
+    snprintf(g_amount, sizeof(g_amount), "APT %.*s", sizeof(amount), amount);
     PRINTF("Amount: %s\n", g_amount);
 
     return UI_PREPARED;
