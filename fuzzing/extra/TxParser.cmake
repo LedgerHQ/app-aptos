@@ -13,7 +13,7 @@ set(CMAKE_C_FLAGS_DEBUG
 
 set(BOLOS_SDK $ENV{BOLOS_SDK})
 
-add_library(txparser SHARED
+add_library(txparser STATIC
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/bcs/init.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/bcs/decoder.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../src/bcs/utf8.c
