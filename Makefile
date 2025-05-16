@@ -25,9 +25,6 @@ include $(BOLOS_SDK)/Makefile.defines
 #          Aptos configuration         #
 ########################################
 
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-    DEFINES += MAX_TRANSACTION_PACKETS=6
-endif
 ifeq ($(TARGET_NAME),TARGET_NANOS2)
     DEFINES += MAX_TRANSACTION_PACKETS=106
 endif
@@ -59,7 +56,6 @@ APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 APP_SOURCE_PATH += src
 
 # Application icons
-ICON_NANOS = icons/app_aptos_16px.gif
 ICON_NANOX = icons/app_aptos_14px.gif
 ICON_NANOSP = icons/app_aptos_14px.gif
 ICON_STAX = icons/app_aptos_32px.gif

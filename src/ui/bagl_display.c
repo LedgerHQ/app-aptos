@@ -62,14 +62,6 @@ static void ui_action_allow_blind_signing(const ux_flow_step_t *const *steps) {
     ux_flow_init(0, steps, steps[1]);
 }
 
-#ifdef TARGET_NANOS
-UX_STEP_NOCB(ux_display_blind_sign_banner_step,
-             bnnn_paging,
-             {
-                 .title = "Error",
-                 .text = "Blind signing must be enabled in Settings",
-             });
-#else
 // Step with icon and text
 UX_STEP_NOCB(ux_display_blind_sign_banner_step,
              pnn,
@@ -78,7 +70,6 @@ UX_STEP_NOCB(ux_display_blind_sign_banner_step,
                  "Blind signing must be",
                  "enabled in Settings",
              });
-#endif
 // Step with approve button
 UX_STEP_CB(ux_display_approve_step,
            pb,
