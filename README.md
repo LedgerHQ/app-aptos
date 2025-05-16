@@ -2,7 +2,6 @@
 
 Aptos wallet application supporting the following Ledger devices:
 
-- Nano S
 - Nano S Plus
 - Nano X
 - Stax
@@ -59,16 +58,6 @@ $ sudo docker build -t ledger-app-builder:latest .
 
 ### Build the Application
 
-**For the Nano S**
-
-In the source folder of the application (or replace ‘realpath’ with your app’s local path):
-
-```shell
-$ docker run --rm -ti -v "$(realpath .):/app" ledger-app-builder:latest
-
-root@656be163fe84:/app# make
-```
-
 **For the Nano X and Nano S Plus**
 
 For Nano X and S Plus, specify the `BOLOS_SDK` environment variable before building your app, in the source folder of the app.
@@ -93,7 +82,7 @@ _**NOTE: If you change the `BOLOS_SDK` variable between two builds, you can firs
 
 ### Exit the image
 
-The build generates several files in your application folder and especially the `app.elf` that can be loaded to a Nano S or S Plus or into the Nano X or S Emulator (Speculos).
+The build generates several files in your application folder and especially the `app.elf` that can be loaded to a Nano S Plus or into the Nano X or S Emulator (Speculos).
 
 You can exit the image, with the `exit` command.
 
@@ -122,17 +111,14 @@ $ docker run --rm -ti -v "/dev/bus/usb:/dev/bus/usb" -v "$(realpath .):/app" --p
 
 While the container image is running:
 
-1. Plug and unlock the Nano S or S Plus.
-2. Use `make load` (`BOLOS_SDK=$NANOSP_SDK make load` for the S Plus) to load the app to the Nano S and `make delete` to delete it.
+1. Plug and unlock the Nano S Plus.
+2. Use `BOLOS_SDK=$NANOSP_SDK make load`to load the app to the Nano S Plus and `make delete` to delete it.
 3. You can exit the image, with the command `exit`.
 
 _**NOTE: For more information see the Ledger Dev Docs page:**_
 https://developers.ledger.com/docs/nano-app/load/
 
 ## Load the application (MacOS)
-
-> **Note**
-> Tested on Nano S only
 
 To install the app, we need [virtualenv](https://docs.python.org/3/library/venv.html), this module provides support for creating lightweight “virtual environments” with their own site directories, optionally isolated from system site directories.
 
@@ -143,7 +129,7 @@ $ sudo apt install python3-pip
 $ pip3 install virtualenv
 ```
 
-We will install the app on the hardware wallet Ledger Nano S. Take Ledger Nano S with its cable and plug it into the MacBook.
+We will install the app on the hardware wallet Ledger Nano S Plus. Take Ledger Nano S Plus with its cable and plug it into the MacBook.
 
 ### Run virtulenv
 
@@ -212,7 +198,7 @@ the process outputs HTML and LaTeX documentations in `doc/html` and `doc/latex` 
 The flow processed in [GitHub Actions](https://github.com/features/actions) is the following:
 
 - Code formatting with [clang-format](http://clang.llvm.org/docs/ClangFormat.html)
-- Compilation of the application for Ledger Nano S in [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder)
+- Compilation of the application for Ledger Nano S Plus in [ledger-app-builder](https://github.com/LedgerHQ/ledger-app-builder)
 - Unit tests of C functions with [cmocka](https://cmocka.org/) (see [unit-tests/](unit-tests/))
 - End-to-end tests with [Speculos](https://github.com/LedgerHQ/speculos) emulator (see [tests/](tests/))
 - Code coverage with [gcov](https://gcc.gnu.org/onlinedocs/gcc/Gcov.html)/[lcov](http://ltp.sourceforge.net/coverage/lcov.php) and upload to [codecov.io](https://about.codecov.io)

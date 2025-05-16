@@ -85,6 +85,10 @@ typedef enum {
     FUNC_COIN_TRANSFER = 2,
     FUNC_APTOS_ACCOUNT_TRANSFER_COINS = 3,
     FUNC_FUNGIBLE_STORE_TRANSFER = 4,
+    FUNC_ADD_STAKE = 5,
+    FUNC_UNLOCK_STAKE = 6,
+    FUNC_REACTIVATE_STAKE = 7,
+    FUNC_WITHDRAW_STAKE = 8,
 } entry_function_known_type_t;
 
 typedef struct {
@@ -111,6 +115,11 @@ typedef struct {
 } args_fungible_asset_transfer_t;
 
 typedef struct {
+    uint8_t pool[ADDRESS_LEN];
+    uint64_t amount;
+} args_delegation_pool_transfer_t;
+
+typedef struct {
     module_id_t module_id;
     fixed_bytes_t function_name;
     entry_function_known_type_t known_type;
@@ -122,6 +131,7 @@ typedef struct {
             args_aptos_account_transfer_t transfer;
             args_coin_transfer_t coin_transfer;
             args_fungible_asset_transfer_t fa_transfer;
+            args_delegation_pool_transfer_t delegation;
         };
     } args;
 } entry_function_payload_t;
