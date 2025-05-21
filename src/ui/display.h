@@ -11,6 +11,8 @@ extern char g_function[120];
 extern char g_amount[30];
 extern int g_is_token_listed;
 
+#include "../types.h"
+
 /**
  * Display address on the device and ask confirmation to export.
  *
@@ -43,3 +45,6 @@ int ui_prepare_tx_coin_transfer(void);
 
 int ui_display_tx_fungible_asset_transfer(void);
 int ui_prepare_tx_fungible_asset_transfer(void);
+
+int ui_display_delegation_pool_transfer(entry_function_known_type_t function_type);
+int ui_prepare_delegation_pool_transfer(void);
