@@ -3,7 +3,7 @@ from application_client.aptos_response_unpacker import unpack_get_app_and_versio
 
 
 # Test a specific APDU asking BOLOS (and not the app) the name and version of the current app
-def test_get_app_and_version(backend, backend_name):
+def test_get_app_and_version(backend):
     # Use the app interface instead of raw interface
     client = AptosCommandSender(backend)
     # Send the special instruction to BOLOS
@@ -12,4 +12,4 @@ def test_get_app_and_version(backend, backend_name):
     app_name, version = unpack_get_app_and_version_response(response.data)
 
     assert app_name == "Aptos"
-    assert version == "0.9.14"
+    assert version == "0.9.15"

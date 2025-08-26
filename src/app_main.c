@@ -28,6 +28,10 @@
 #include "ui/menu.h"
 #include "apdu/dispatcher.h"
 
+#ifdef HAVE_SWAP
+#include "swap.h"
+#endif
+
 global_ctx_t G_context;
 const app_storage_t N_app_storage;
 
@@ -52,7 +56,12 @@ void app_main() {
 
     io_init();
     nvm_app_storage_init();
-    ui_menu_main();
+
+#ifdef HAVE_SWAP
+    if (!G_called_from_swap) {
+        ui_menu_main();
+    }
+#endif  // HAVE_SWAP
 
     // Reset context
     explicit_bzero(&G_context, sizeof(G_context));
