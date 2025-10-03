@@ -76,7 +76,7 @@ void nbgl_useCaseReviewVerify(nbgl_operationType_t operation_type,
     if (N_storage.settings.allow_blind_signing) {
         blind_sign_info();
     } else {
-        nbgl_useCaseChoice(&C_Warning_64px,
+        nbgl_useCaseChoice(&LARGE_WARNING_ICON,
                            "Enable blind signing to authorize this operation?",
                            NULL,
                            "Enable blind signing",

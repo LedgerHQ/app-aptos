@@ -26,6 +26,7 @@
 #include "../globals.h"
 #include "menu.h"
 #include "settings.h"
+#include "display.h"
 
 #define SETTINGS_PAGE_NUMBER 2
 
@@ -94,7 +95,7 @@ void ui_menu_main(void) {
         N_storage.settings.allow_blind_signing == 0 ? OFF_STATE : ON_STATE;
 
     nbgl_useCaseHomeAndSettings(APPNAME,
-                                &C_aptos_logo_64px,
+                                &ICON_APP_HOME,
                                 NULL,
                                 INIT_HOME_PAGE,
                                 &g_setting_contents,

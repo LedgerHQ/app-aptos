@@ -48,3 +48,9 @@ int ui_prepare_tx_fungible_asset_transfer(void);
 
 int ui_display_delegation_pool_transfer(entry_function_known_type_t function_type);
 int ui_prepare_delegation_pool_transfer(void);
+
+#if defined(TARGET_STAX) || defined(TARGET_FLEX)
+#define ICON_APP_HOME C_aptos_logo_64px
+#elif defined(TARGET_APEX_P)
+#define ICON_APP_HOME C_aptos_logo_48px
+#endif

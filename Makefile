@@ -31,11 +31,8 @@ endif
 ifeq ($(TARGET_NAME),TARGET_NANOX)
     DEFINES += MAX_TRANSACTION_PACKETS=90
 endif
-ifeq ($(TARGET_NAME),TARGET_STAX)
-    # still need to find the right value
-    DEFINES += MAX_TRANSACTION_PACKETS=70
-endif
-ifeq ($(TARGET_NAME),TARGET_FLEX)
+
+ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_STAX TARGET_FLEX TARGET_APEX_P))
     # still need to find the right value
     DEFINES += MAX_TRANSACTION_PACKETS=70
 endif
@@ -48,8 +45,8 @@ APPNAME = "Aptos"
 
 # Application version
 APPVERSION_M = 0
-APPVERSION_N = 9
-APPVERSION_P = 15
+APPVERSION_N = 10
+APPVERSION_P = 0
 APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -60,6 +57,7 @@ ICON_NANOX = icons/app_aptos_14px.gif
 ICON_NANOSP = icons/app_aptos_14px.gif
 ICON_STAX = icons/app_aptos_32px.gif
 ICON_FLEX = icons/app_aptos_40px.gif
+ICON_APEX_P = icons/app_aptos_32px_apex.png
 
 # Application allowed derivation curves
 CURVE_APP_LOAD_PARAMS = ed25519

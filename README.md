@@ -1,11 +1,6 @@
 # Ledger Aptos Application
 
-Aptos wallet application supporting the following Ledger devices:
-
-- Nano S Plus
-- Nano X
-- Stax
-- Flex
+Aptos wallet application supporting all the Ledger devices
 
 ## Prerequisite
 

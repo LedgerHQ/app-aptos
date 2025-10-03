@@ -1,5 +1,6 @@
 from application_client.aptos_command_sender import AptosCommandSender
 from application_client.aptos_response_unpacker import unpack_get_app_and_version_response
+from utils import verify_version
 
 
 # Test a specific APDU asking BOLOS (and not the app) the name and version of the current app
@@ -12,4 +13,4 @@ def test_get_app_and_version(backend):
     app_name, version = unpack_get_app_and_version_response(response.data)
 
     assert app_name == "Aptos"
-    assert version == "0.9.15"
+    verify_version(version)
