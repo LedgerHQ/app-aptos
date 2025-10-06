@@ -51,7 +51,7 @@ int ui_display_address() {
 
         nbgl_useCaseAddressReview(g_address,
                                   &pair_list,
-                                  &C_aptos_logo_64px,
+                                  &ICON_APP_HOME,
                                   "Verify Aptos address",
                                   NULL,
                                   confirm_address);

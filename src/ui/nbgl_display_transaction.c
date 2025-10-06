@@ -55,7 +55,7 @@ int ui_display_transaction() {
 
         nbgl_useCaseReviewVerify(TYPE_TRANSACTION,
                                  &pair_list,
-                                 &C_aptos_logo_64px,
+                                 &ICON_APP_HOME,
                                  "Review transaction",
                                  NULL,
                                  "Sign transaction?",
@@ -83,7 +83,7 @@ int ui_display_entry_function() {
 
         nbgl_useCaseReviewVerify(TYPE_TRANSACTION,
                                  &pair_list,
-                                 &C_aptos_logo_64px,
+                                 &ICON_APP_HOME,
                                  "Review transaction",
                                  NULL,
                                  "Sign transaction?",
@@ -115,7 +115,7 @@ int ui_display_tx_aptos_account_transfer() {
 
         nbgl_useCaseReview(TYPE_TRANSACTION,
                            &pair_list,
-                           &C_aptos_logo_64px,
+                           &ICON_APP_HOME,
                            "Review transaction to send Aptos",
                            NULL,
                            "Sign transaction?",
@@ -144,7 +144,7 @@ void ui_listed_coin_transfer_flow_display() {
 
     nbgl_useCaseReview(TYPE_TRANSACTION,
                        &pair_list,
-                       &C_aptos_logo_64px,
+                       &ICON_APP_HOME,
                        "Review transaction to transfer coins",
                        NULL,
                        "Sign transaction to transfer coins?",
@@ -171,7 +171,7 @@ void ui_unlisted_coin_transfer_flow_display() {
 
     nbgl_useCaseReview(TYPE_TRANSACTION,
                        &pair_list,
-                       &C_aptos_logo_64px,
+                       &ICON_APP_HOME,
                        "Review transaction to transfer coins",
                        NULL,
                        "Sign transaction to transfer coins?",
@@ -267,7 +267,7 @@ void ui_delegation_pool_flow_display(entry_function_known_type_t function_type) 
 
     nbgl_useCaseReview(TYPE_TRANSACTION,
                        &pair_list,
-                       &C_aptos_logo_64px,
+                       &ICON_APP_HOME,
                        get_delegation_title(function_type),
                        NULL,
                        get_delegation_sign_review(function_type),
