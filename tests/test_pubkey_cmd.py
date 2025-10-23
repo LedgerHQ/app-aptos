@@ -35,11 +35,16 @@ def test_get_public_key_confirm_accepted(firmware, backend, navigator, test_name
                                                       ROOT_SCREENSHOT_PATH,
                                                       test_name)
         else:
+            if firmware.device == "flex":
+                qr_coordinates = (80, 430)
+            elif firmware.device == "stax":
+                qr_coordinates = (70, 530)
+            elif firmware.device == "apex_p":
+                qr_coordinates = (43, 299)
             instructions = [
                 NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
-                NavIns(NavInsID.TOUCH, (200, 300)),
+                NavIns(NavInsID.TOUCH, qr_coordinates),
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
-                NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
                 NavInsID.USE_CASE_STATUS_DISMISS
             ]

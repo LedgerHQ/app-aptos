@@ -55,7 +55,7 @@ int ui_display_message() {
     if (is_str_interrupted((const char *) G_context.tx_info.raw_tx, G_context.tx_info.raw_tx_len)) {
         nbgl_useCaseReviewVerify(TYPE_MESSAGE,
                                  &pair_list,
-                                 &C_Review_64px,
+                                 &LARGE_REVIEW_ICON,
                                  "Review message",
                                  NULL,
                                  "Sign message?",
@@ -64,7 +64,7 @@ int ui_display_message() {
     } else {
         nbgl_useCaseReview(TYPE_MESSAGE,
                            &pair_list,
-                           &C_Review_64px,
+                           &LARGE_REVIEW_ICON,
                            "Review message",
                            NULL,
                            "Sign message?",
@@ -98,7 +98,7 @@ int ui_display_raw_message() {
     if (!short_enough) {
         nbgl_useCaseReviewVerify(TYPE_MESSAGE,
                                  &pair_list,
-                                 &C_Review_64px,
+                                 &LARGE_REVIEW_ICON,
                                  "Review message",
                                  NULL,
                                  "Sign message?",
@@ -107,7 +107,7 @@ int ui_display_raw_message() {
     } else {
         nbgl_useCaseReview(TYPE_MESSAGE,
                            &pair_list,
-                           &C_Review_64px,
+                           &LARGE_REVIEW_ICON,
                            "Review message",
                            NULL,
                            "Sign message?",
