@@ -15,15 +15,16 @@
  *  limitations under the License.
  ********************************************************************************/
 
-#include <string.h>
 #include "parse.h"
+
+#include <string.h>
 
 #define MAX_AMOUNT_STR_LEN 21  // 19 for u64 + 1 for '\0' +1 for '.'
 
 /**
  * Adjusts the number of decimals of a string representation of a number.
- * If the number of decimals is greater than the number of decimals in the string,
- * it adds zeros at the end of the string.
+ * If the number of decimals is greater than the number of decimals in the
+ * string, it adds zeros at the end of the string.
  *
  * @param[in] src
  * The string representation of the number.
@@ -42,11 +43,8 @@
  *
  * @return true if success, false otherwise.
  */
-bool adjust_decimals(const char *src,
-                     uint32_t src_length,
-                     uint8_t decimals,
-                     char *target,
-                     uint32_t target_length) {
+bool adjust_decimals(const char* src, uint32_t src_length, uint8_t decimals,
+                     char* target, uint32_t target_length) {
     uint32_t start_offset;
     uint32_t last_zero_offset = 0;
     uint32_t offset = 0;
@@ -102,7 +100,8 @@ bool adjust_decimals(const char *src,
     return true;
 }
 
-unsigned short print_amount(uint64_t amount, uint8_t decimals, char *out, uint32_t out_len) {
+unsigned short print_amount(uint64_t amount, uint8_t decimals, char* out,
+                            uint32_t out_len) {
     if (amount == 0) {
         if (out_len < 2) {
             return 0;
@@ -140,9 +139,7 @@ unsigned short print_amount(uint64_t amount, uint8_t decimals, char *out, uint32
     return strlen(out);
 }
 
-static bool is_digit(char c) {
-    return '0' <= c && c <= '9';
-}
+static bool is_digit(char c) { return '0' <= c && c <= '9'; }
 
 static bool is_alpha(char c) {
     return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
@@ -164,10 +161,10 @@ static char to_lowercase(char c) {
 }
 
 static uint8_t lowercase_hex_to_int(char c) {
-    return (uint8_t) (is_digit(c) ? c - '0' : c - 'a' + 10);
+    return (uint8_t)(is_digit(c) ? c - '0' : c - 'a' + 10);
 }
 
-int hex_str_to_u8(const char *str, uint8_t *out, size_t n) {
+int hex_str_to_u8(const char* str, uint8_t* out, size_t n) {
     if (strlen(str) < 2 * n) {
         return -1;
     }

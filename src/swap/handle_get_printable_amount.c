@@ -1,14 +1,16 @@
 #ifdef HAVE_SWAP
 
 #include <string.h>  // memset, explicit_bzero
-#include "swap.h"
-#include "constants.h"
+
 #include "common/parse.h"
+#include "constants.h"
+#include "swap.h"
 
 #define MAX_TICKER_LEN 16
 
 /* Set empty printable_amount on error, printable amount otherwise */
-void swap_handle_get_printable_amount(get_printable_amount_parameters_t* params) {
+void swap_handle_get_printable_amount(
+    get_printable_amount_parameters_t* params) {
     uint64_t amount;
     uint8_t decimals;
     char ticker[MAX_TICKER_LEN] = {0};
@@ -22,10 +24,8 @@ void swap_handle_get_printable_amount(get_printable_amount_parameters_t* params)
         decimals = APT_DECIMAL_PRECISION;
     } else {
         if (!swap_parse_config(params->coin_configuration,
-                               params->coin_configuration_length,
-                               ticker,
-                               sizeof(ticker),
-                               &decimals)) {
+                               params->coin_configuration_length, ticker,
+                               sizeof(ticker), &decimals)) {
             PRINTF("Fail to parse coin_configuration\n");
             goto error;
         }
@@ -36,9 +36,7 @@ void swap_handle_get_printable_amount(get_printable_amount_parameters_t* params)
         goto error;
     }
 
-    if (print_amount(amount,
-                     decimals,
-                     params->printable_amount,
+    if (print_amount(amount, decimals, params->printable_amount,
                      sizeof(params->printable_amount)) == 0) {
         PRINTF("print_amount failed\n");
         goto error;

@@ -1,17 +1,16 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-
 #include <cmocka.h>
+#include <setjmp.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "transaction/deserialize.h"
 #include "transaction/types.h"
 
-static void test_tx_deserialization(void **state) {
-    (void) state;
+static void test_tx_deserialization(void** state) {
+    (void)state;
 
     static transaction_t tx;
     // clang-format off

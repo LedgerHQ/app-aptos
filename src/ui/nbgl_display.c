@@ -17,19 +17,19 @@
 
 #ifdef HAVE_NBGL
 
+#include "nbgl_display.h"
+
 #include <stdbool.h>  // bool
 #include <string.h>   // memset
 
-#include "os.h"
-#include "glyphs.h"
-#include "nbgl_use_case.h"
-
-#include "nbgl_display.h"
-#include "display.h"
-#include "settings.h"
-#include "menu.h"
-#include "constants.h"
 #include "../globals.h"
+#include "constants.h"
+#include "display.h"
+#include "glyphs.h"
+#include "menu.h"
+#include "nbgl_use_case.h"
+#include "os.h"
+#include "settings.h"
 
 static use_case_review_ctx_t blind_sign_ctx;
 
@@ -37,14 +37,11 @@ nbgl_contentTagValue_t pairs[6];
 nbgl_contentTagValueList_t pair_list;
 
 static void blind_sign_info() {
-    nbgl_useCaseReviewBlindSigning(blind_sign_ctx.operation_type,
-                                   blind_sign_ctx.tag_value_list,
-                                   blind_sign_ctx.icon,
-                                   blind_sign_ctx.review_title,
-                                   blind_sign_ctx.review_sub_title,
-                                   blind_sign_ctx.finish_title,
-                                   blind_sign_ctx.tip_box,
-                                   blind_sign_ctx.choice_callback);
+    nbgl_useCaseReviewBlindSigning(
+        blind_sign_ctx.operation_type, blind_sign_ctx.tag_value_list,
+        blind_sign_ctx.icon, blind_sign_ctx.review_title,
+        blind_sign_ctx.review_sub_title, blind_sign_ctx.finish_title,
+        blind_sign_ctx.tip_box, blind_sign_ctx.choice_callback);
 }
 
 static void blind_sign_choice(bool enable) {
@@ -57,12 +54,12 @@ static void blind_sign_choice(bool enable) {
 }
 
 void nbgl_useCaseReviewVerify(nbgl_operationType_t operation_type,
-                              const nbgl_contentTagValueList_t *tag_value_list,
-                              const nbgl_icon_details_t *icon,
-                              const char *review_title,
-                              const char *review_sub_title,
-                              const char *finish_title,
-                              const nbgl_tipBox_t *tip_box,
+                              const nbgl_contentTagValueList_t* tag_value_list,
+                              const nbgl_icon_details_t* icon,
+                              const char* review_title,
+                              const char* review_sub_title,
+                              const char* finish_title,
+                              const nbgl_tipBox_t* tip_box,
                               nbgl_choiceCallback_t choice_callback) {
     blind_sign_ctx.operation_type = operation_type;
     blind_sign_ctx.tag_value_list = tag_value_list;
@@ -78,9 +75,7 @@ void nbgl_useCaseReviewVerify(nbgl_operationType_t operation_type,
     } else {
         nbgl_useCaseChoice(&LARGE_WARNING_ICON,
                            "Enable blind signing to authorize this operation?",
-                           NULL,
-                           "Enable blind signing",
-                           "Reject operation",
+                           NULL, "Enable blind signing", "Reject operation",
                            blind_sign_choice);
     }
 }

@@ -1,17 +1,18 @@
 #ifdef HAVE_SWAP
 
 #include "handle_swap_sign_transaction.h"
-#include "display.h"
-#include "swap.h"
-#include "string.h"
-#include "os_lib.h"
-#include "constants.h"
-#include "os_utils.h"
-#include "globals.h"
-#include "sw.h"
-#include "os.h"
+
 #include "../globals.h"
 #include "common/parse.h"
+#include "constants.h"
+#include "display.h"
+#include "globals.h"
+#include "os.h"
+#include "os_lib.h"
+#include "os_utils.h"
+#include "string.h"
+#include "sw.h"
+#include "swap.h"
 
 typedef struct swap_validated_s {
     bool initialized;
@@ -62,11 +63,10 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
         return false;
     }
     // first copy parameters to stack, and then to global data.
-    // We need this "trick" as the input data position can overlap with app globals
-    // and also because we want to memset the whole bss segment as it is not done
-    // when an app is called as a lib.
-    // This is necessary as many part of the code expect bss variables to
-    // initialized at 0.
+    // We need this "trick" as the input data position can overlap with app
+    // globals and also because we want to memset the whole bss segment as it is
+    // not done when an app is called as a lib. This is necessary as many part
+    // of the code expect bss variables to initialized at 0.
     swap_validated_t swap_validated;
     memset(&swap_validated, 0, sizeof(swap_validated));
 
@@ -76,11 +76,10 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
         memcpy(swap_validated.ticker, "APT", sizeof("APT"));
         swap_validated.decimals = APT_DECIMAL_PRECISION;
     } else {
-        if (!swap_parse_config(params->coin_configuration,
-                               params->coin_configuration_length,
-                               swap_validated.ticker,
-                               sizeof(swap_validated.ticker),
-                               &swap_validated.decimals)) {
+        if (!swap_parse_config(
+                params->coin_configuration, params->coin_configuration_length,
+                swap_validated.ticker, sizeof(swap_validated.ticker),
+                &swap_validated.decimals)) {
             PRINTF("Fail to parse coin_configuration\n");
             return false;
         }
@@ -88,18 +87,20 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
 
     // Save recipient
     PRINTF("Recipient in params: %s\n", params->destination_address);
-    if (hex_str_to_u8(params->destination_address + 2, swap_validated.recipient, ADDRESS_LEN) !=
-        0) {
+    if (hex_str_to_u8(params->destination_address + 2, swap_validated.recipient,
+                      ADDRESS_LEN) != 0) {
         PRINTF("Fail to parse recipient\n");
     };
 
     // Save amount
-    if (!swap_str_to_u64(params->amount, params->amount_length, &swap_validated.amount)) {
+    if (!swap_str_to_u64(params->amount, params->amount_length,
+                         &swap_validated.amount)) {
         return false;
     }
 
     // Save the fee
-    if (!swap_str_to_u64(params->fee_amount, params->fee_amount_length, &swap_validated.fee)) {
+    if (!swap_str_to_u64(params->fee_amount, params->fee_amount_length,
+                         &swap_validated.fee)) {
         return false;
     }
 
@@ -111,7 +112,8 @@ bool swap_copy_transaction_parameters(create_transaction_parameters_t* params) {
     // Keep the address at which we'll reply the signing status
     G_swap_sign_return_value_address = &params->result;
 
-    // Commit from stack to global data, params becomes tainted but we won't access it anymore
+    // Commit from stack to global data, params becomes tainted but we won't
+    // access it anymore
     memcpy(&G_swap_validated, &swap_validated, sizeof(swap_validated));
 
     PRINTF("Exiting Aptos swap_copy_transaction_parameters\n");
@@ -132,17 +134,17 @@ static bool validate_swap_amount(uint64_t amount) {
     if (amount != G_swap_validated.amount) {
         return false;
     }
-    // NOTE: in other Nano Apps the validation is done in string type. We're keeping it as well.
+    // NOTE: in other Nano Apps the validation is done in string type. We're
+    // keeping it as well.
     char validated_amount_str[MAX_PRINTABLE_AMOUNT_SIZE];
-    if (print_amount(G_swap_validated.amount,
-                     G_swap_validated.decimals,
-                     validated_amount_str,
-                     sizeof(validated_amount_str)) == 0) {
+    if (print_amount(G_swap_validated.amount, G_swap_validated.decimals,
+                     validated_amount_str, sizeof(validated_amount_str)) == 0) {
         PRINTF("Conversion failed\n");
         return false;
     }
     char amount_str[MAX_PRINTABLE_AMOUNT_SIZE];
-    if (print_amount(amount, G_swap_validated.decimals, amount_str, sizeof(amount_str)) == 0) {
+    if (print_amount(amount, G_swap_validated.decimals, amount_str,
+                     sizeof(amount_str)) == 0) {
         PRINTF("Conversion failed\n");
         return false;
     }
@@ -171,7 +173,8 @@ bool swap_check_validity() {
     // Validate it's and actual coin transfer type
     transaction_t* transaction = &G_context.tx_info.transaction;
     if (transaction->tx_variant != TX_RAW) {
-        PRINTF("TX variant different from TX_RAW is not compatible with Swap.\n");
+        PRINTF(
+            "TX variant different from TX_RAW is not compatible with Swap.\n");
         return false;
     }
 
@@ -184,16 +187,20 @@ bool swap_check_validity() {
     // Differentiate between the different types of transaction->
     uint64_t amount = 0;
     uint8_t* receiver;
-    uint64_t gas_fee_value = transaction->gas_unit_price * transaction->max_gas_amount;
+    uint64_t gas_fee_value =
+        transaction->gas_unit_price * transaction->max_gas_amount;
     switch (transaction->payload.entry_function.known_type) {
         case FUNC_APTOS_ACCOUNT_TRANSFER:
             amount = transaction->payload.entry_function.args.transfer.amount;
-            receiver = transaction->payload.entry_function.args.transfer.receiver;
+            receiver =
+                transaction->payload.entry_function.args.transfer.receiver;
             break;
         case FUNC_COIN_TRANSFER:
         case FUNC_APTOS_ACCOUNT_TRANSFER_COINS:
-            amount = transaction->payload.entry_function.args.coin_transfer.amount;
-            receiver = transaction->payload.entry_function.args.coin_transfer.receiver;
+            amount =
+                transaction->payload.entry_function.args.coin_transfer.amount;
+            receiver =
+                transaction->payload.entry_function.args.coin_transfer.receiver;
             break;
         default:
             PRINTF("Unknown function type\n");
@@ -214,9 +221,12 @@ bool swap_check_validity() {
 
     // Validate recipient
     if (memcmp(receiver, G_swap_validated.recipient, ADDRESS_LEN) != 0) {
-        PRINTF("Recipient on Transaction is different from validated package.\n");
-        PRINTF("Recipient requested in the transaction: %.*H\n", ADDRESS_LEN, receiver);
-        PRINTF("Recipient validated in the swap: %.*H\n", ADDRESS_LEN, G_swap_validated.recipient);
+        PRINTF(
+            "Recipient on Transaction is different from validated package.\n");
+        PRINTF("Recipient requested in the transaction: %.*H\n", ADDRESS_LEN,
+               receiver);
+        PRINTF("Recipient validated in the swap: %.*H\n", ADDRESS_LEN,
+               G_swap_validated.recipient);
         return false;
     }
 

@@ -16,16 +16,18 @@
  *****************************************************************************/
 
 #ifdef HAVE_SWAP
-#include <string.h>
-#include "swap.h"
-#include "os.h"
-#include "../address.h"
-#include "../handler/get_public_key.h"
-#include "../common/user_format.h"
-#include "../transaction/utils.h"
 #include <ctype.h>
+#include <string.h>
 
-// The address string length is 66, 2 characters for the prefix and 64 for the address
+#include "../address.h"
+#include "../common/user_format.h"
+#include "../handler/get_public_key.h"
+#include "../transaction/utils.h"
+#include "os.h"
+#include "swap.h"
+
+// The address string length is 66, 2 characters for the prefix and 64 for the
+// address
 #define ADDRESS_STRING_LENGTH 66
 
 /**
@@ -37,18 +39,19 @@
  *   Command data address parameters and address to check.
  *
  */
-void swap_handle_check_address(check_address_parameters_t *params) {
+void swap_handle_check_address(check_address_parameters_t* params) {
     PRINTF("Inside Aptos swap_handle_check_address\n");
     params->result = 0;
 
     // Checking that parameters are correct
-    if (params->address_parameters == NULL || params->address_parameters_length == 0) {
+    if (params->address_parameters == NULL ||
+        params->address_parameters_length == 0) {
         PRINTF("address_parameters is empty\n");
         return;
     }
-    PRINTF("address_parameters_length: %d\n", params->address_parameters_length);
-    PRINTF("address_parameters: %.*H\n",
-           params->address_parameters_length,
+    PRINTF("address_parameters_length: %d\n",
+           params->address_parameters_length);
+    PRINTF("address_parameters: %.*H\n", params->address_parameters_length,
            params->address_parameters);
 
     if (params->address_to_check == NULL) {
@@ -58,8 +61,7 @@ void swap_handle_check_address(check_address_parameters_t *params) {
 
     if (strlen(params->address_to_check) != ADDRESS_STRING_LENGTH) {
         PRINTF("address_to_check length should be %d, not %d\n",
-               ADDRESS_STRING_LENGTH,
-               strlen(params->address_to_check));
+               ADDRESS_STRING_LENGTH, strlen(params->address_to_check));
         return;
     }
 
@@ -76,14 +78,16 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         PRINTF("get_public_key failed\n");
         return;
     }
-    // Calculate the address from the public key, and decode it to readable format
+    // Calculate the address from the public key, and decode it to readable
+    // format
     uint8_t address[ADDRESS_LEN] = {0};
-    if (!address_from_pubkey(public_key.raw_public_key, address, sizeof(address))) {
+    if (!address_from_pubkey(public_key.raw_public_key, address,
+                             sizeof(address))) {
         return;
     }
     char prefixed_address[ADDRESS_STRING_LENGTH + 1];
-    if (0 >
-        format_prefixed_hex(address, sizeof(address), prefixed_address, sizeof(prefixed_address))) {
+    if (0 > format_prefixed_hex(address, sizeof(address), prefixed_address,
+                                sizeof(prefixed_address))) {
         return;
     }
 
