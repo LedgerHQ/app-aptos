@@ -24,7 +24,7 @@ static void test_transaction_utils_bcs_cmp_bytes(void **state) {
     (void) state;
 
     const uint8_t good_bytes[] = {0x48, 0x65, 0x6c, 0x6c, 0x6f};  // Hello
-    const fixed_bytes_t bcs_bytes = {.len = 5, .bytes = &good_bytes};
+    const fixed_bytes_t bcs_bytes = {.len = 5, .bytes = (uint8_t *)good_bytes};
     const char good_str[] = "Hello";
     const char bad_str[] = "Hello!";
     assert_true(bcs_cmp_bytes(&bcs_bytes, good_str, strlen(good_str)));
