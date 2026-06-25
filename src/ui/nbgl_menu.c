@@ -18,15 +18,14 @@
 
 #ifdef HAVE_NBGL
 
-#include "os.h"
-#include "io.h"
-#include "glyphs.h"
-#include "nbgl_use_case.h"
-
 #include "../globals.h"
-#include "menu.h"
-#include "settings.h"
 #include "display.h"
+#include "glyphs.h"
+#include "io.h"
+#include "menu.h"
+#include "nbgl_use_case.h"
+#include "os.h"
+#include "settings.h"
 
 #define SETTINGS_PAGE_NUMBER 2
 
@@ -40,7 +39,8 @@ enum {
 };
 
 static const char* const INFO_TYPES[] = {"Version", "Developer", "Copyright"};
-static const char* const INFO_CONTENTS[] = {APPVERSION, "Ledger", "(c) 2024 Ledger"};
+static const char* const INFO_CONTENTS[] = {APPVERSION, "Ledger",
+                                            "(c) 2024 Ledger"};
 
 static nbgl_contentSwitch_t g_switches[SWITCHES_COUNT];
 
@@ -71,7 +71,8 @@ static const nbgl_genericContents_t g_setting_contents = {
     .nbContents = 1,
 };
 
-static void settings_controls_callback(int token, uint8_t index, __attribute__((unused)) int page) {
+static void settings_controls_callback(int token, uint8_t index,
+                                       __attribute__((unused)) int page) {
     switch (token) {
         case TOKEN_BLIND_SIGNING:
             if (index == 0 || index == 1) {
@@ -83,9 +84,7 @@ static void settings_controls_callback(int token, uint8_t index, __attribute__((
     }
 }
 
-void app_quit(void) {
-    os_sched_exit(-1);
-}
+void app_quit(void) { os_sched_exit(-1); }
 
 void ui_menu_main(void) {
     g_switches[SWITCH_BLIND_SIGNING].text = "Blind signing";
@@ -94,13 +93,8 @@ void ui_menu_main(void) {
     g_switches[SWITCH_BLIND_SIGNING].initState =
         N_storage.settings.allow_blind_signing == 0 ? OFF_STATE : ON_STATE;
 
-    nbgl_useCaseHomeAndSettings(APPNAME,
-                                &ICON_APP_HOME,
-                                NULL,
-                                INIT_HOME_PAGE,
-                                &g_setting_contents,
-                                &g_infos_list,
-                                NULL,
+    nbgl_useCaseHomeAndSettings(APPNAME, &ICON_APP_HOME, NULL, INIT_HOME_PAGE,
+                                &g_setting_contents, &g_infos_list, NULL,
                                 app_quit);
 }
 

@@ -20,18 +20,17 @@
 #include <stdbool.h>  // bool
 #include <string.h>   // memset
 
-#include "os.h"
-#include "format.h"
-#include "glyphs.h"
-#include "nbgl_use_case.h"
-
-#include "nbgl_display.h"
-#include "display.h"
-#include "menu.h"
-#include "constants.h"
+#include "../common/user_format.h"
 #include "../globals.h"
 #include "action/validate.h"
-#include "../common/user_format.h"
+#include "constants.h"
+#include "display.h"
+#include "format.h"
+#include "glyphs.h"
+#include "menu.h"
+#include "nbgl_display.h"
+#include "nbgl_use_case.h"
+#include "os.h"
 
 #define DOTS "[...]"
 
@@ -46,28 +45,20 @@ static void review_choice(bool confirm) {
 
 int ui_display_message() {
     pairs[0].item = "Message";
-    pairs[0].value = (const char *) G_context.tx_info.raw_tx;
+    pairs[0].value = (const char*)G_context.tx_info.raw_tx;
 
     pair_list.nbMaxLinesForValue = 0;
     pair_list.nbPairs = 1;
     pair_list.pairs = pairs;
 
-    if (is_str_interrupted((const char *) G_context.tx_info.raw_tx, G_context.tx_info.raw_tx_len)) {
-        nbgl_useCaseReviewVerify(TYPE_MESSAGE,
-                                 &pair_list,
-                                 &LARGE_REVIEW_ICON,
-                                 "Review message",
-                                 NULL,
-                                 "Sign message?",
-                                 NULL,
+    if (is_str_interrupted((const char*)G_context.tx_info.raw_tx,
+                           G_context.tx_info.raw_tx_len)) {
+        nbgl_useCaseReviewVerify(TYPE_MESSAGE, &pair_list, &LARGE_REVIEW_ICON,
+                                 "Review message", NULL, "Sign message?", NULL,
                                  review_choice);
     } else {
-        nbgl_useCaseReview(TYPE_MESSAGE,
-                           &pair_list,
-                           &LARGE_REVIEW_ICON,
-                           "Review message",
-                           NULL,
-                           "Sign message?",
+        nbgl_useCaseReview(TYPE_MESSAGE, &pair_list, &LARGE_REVIEW_ICON,
+                           "Review message", NULL, "Sign message?",
                            review_choice);
     }
 
@@ -76,15 +67,15 @@ int ui_display_message() {
 
 int ui_display_raw_message() {
     memset(g_struct, 0, sizeof(g_struct));
-    const bool short_enough = sizeof(g_struct) >= 2 * G_context.tx_info.raw_tx_len + 1;
+    const bool short_enough =
+        sizeof(g_struct) >= 2 * G_context.tx_info.raw_tx_len + 1;
     if (short_enough) {
-        format_hex(G_context.tx_info.raw_tx,
-                   G_context.tx_info.raw_tx_len,
-                   g_struct,
-                   sizeof(g_struct));
+        format_hex(G_context.tx_info.raw_tx, G_context.tx_info.raw_tx_len,
+                   g_struct, sizeof(g_struct));
     } else {
         const size_t cropped_bytes_len = (sizeof(g_struct) - sizeof(DOTS)) / 2;
-        format_hex(G_context.tx_info.raw_tx, cropped_bytes_len, g_struct, sizeof(g_struct));
+        format_hex(G_context.tx_info.raw_tx, cropped_bytes_len, g_struct,
+                   sizeof(g_struct));
         strncpy(g_struct + cropped_bytes_len * 2, DOTS, sizeof(DOTS));
     }
 
@@ -96,21 +87,12 @@ int ui_display_raw_message() {
     pair_list.pairs = pairs;
 
     if (!short_enough) {
-        nbgl_useCaseReviewVerify(TYPE_MESSAGE,
-                                 &pair_list,
-                                 &LARGE_REVIEW_ICON,
-                                 "Review message",
-                                 NULL,
-                                 "Sign message?",
-                                 NULL,
+        nbgl_useCaseReviewVerify(TYPE_MESSAGE, &pair_list, &LARGE_REVIEW_ICON,
+                                 "Review message", NULL, "Sign message?", NULL,
                                  review_choice);
     } else {
-        nbgl_useCaseReview(TYPE_MESSAGE,
-                           &pair_list,
-                           &LARGE_REVIEW_ICON,
-                           "Review message",
-                           NULL,
-                           "Sign message?",
+        nbgl_useCaseReview(TYPE_MESSAGE, &pair_list, &LARGE_REVIEW_ICON,
+                           "Review message", NULL, "Sign message?",
                            review_choice);
     }
 
