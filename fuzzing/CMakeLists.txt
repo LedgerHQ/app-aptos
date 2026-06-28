@@ -8,7 +8,7 @@ endif()
 project(FuzzTxParser
         VERSION 1.0
 	      DESCRIPTION "Fuzzing of transaction parser"
-        LANGUAGES CXX)
+        LANGUAGES C CXX)
 
 # guard against bad build-type strings
 if (NOT CMAKE_BUILD_TYPE)
@@ -55,7 +55,8 @@ endif()
 
 include(extra/TxParser.cmake)
 
-add_executable(fuzz_tx_parser fuzz_tx_parser.cc)
+add_executable(fuzz_tx_parser fuzz_tx_parser.c)
+set_target_properties(fuzz_tx_parser PROPERTIES LINKER_LANGUAGE CXX)
 
 target_compile_options(fuzz_tx_parser
     PRIVATE ${COMPILATION_FLAGS}
