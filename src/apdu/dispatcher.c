@@ -15,23 +15,23 @@
  *  limitations under the License.
  *****************************************************************************/
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "dispatcher.h"
 
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "../constants.h"
+#include "../globals.h"
+#include "../handler/get_app_name.h"
+#include "../handler/get_public_key.h"
+#include "../handler/get_version.h"
+#include "../handler/sign_tx.h"
+#include "../sw.h"
+#include "../types.h"
 #include "buffer.h"
 #include "io.h"
 
-#include "dispatcher.h"
-#include "../constants.h"
-#include "../globals.h"
-#include "../types.h"
-#include "../sw.h"
-#include "../handler/get_version.h"
-#include "../handler/get_app_name.h"
-#include "../handler/get_public_key.h"
-#include "../handler/sign_tx.h"
-
-int apdu_dispatcher(const command_t *cmd) {
+int apdu_dispatcher(const command_t* cmd) {
     PRINTF("Inside Aptos apdu_dispatcher\n");
     if (cmd->cla != CLA) {
         return io_send_sw(SW_CLA_NOT_SUPPORTED);
@@ -68,7 +68,7 @@ int apdu_dispatcher(const command_t *cmd) {
             buf.size = cmd->lc;
             buf.offset = 0;
 
-            return handler_get_public_key(&buf, (bool) cmd->p1);
+            return handler_get_public_key(&buf, (bool)cmd->p1);
         case SIGN_TX:
             PRINTF("SIGN_TX\n");
             if ((cmd->p1 == P1_START && cmd->p2 != P2_MORE) ||  //
@@ -86,8 +86,10 @@ int apdu_dispatcher(const command_t *cmd) {
             buf.ptr = cmd->data;
             buf.size = cmd->lc;
             buf.offset = 0;
-            PRINTF("Inside Aptos apdu_dispatcher: ready to call handler_sign_tx\n");
-            return handler_sign_tx(&buf, cmd->p1, (bool) (cmd->p2 & P2_MORE));
+            PRINTF(
+                "Inside Aptos apdu_dispatcher: ready to call "
+                "handler_sign_tx\n");
+            return handler_sign_tx(&buf, cmd->p1, (bool)(cmd->p2 & P2_MORE));
         default:
             return io_send_sw(SW_INS_NOT_SUPPORTED);
     }

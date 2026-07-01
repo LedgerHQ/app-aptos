@@ -17,11 +17,10 @@
 
 #ifdef HAVE_BAGL
 
-#include "os.h"
-
-#include "settings.h"
-#include "menu.h"
 #include "../globals.h"
+#include "menu.h"
+#include "os.h"
+#include "settings.h"
 
 static const char* settings_submenu_getter(unsigned int idx);
 
@@ -40,20 +39,17 @@ static const char* binary_choice_getter(unsigned int idx) {
 
 static void show_full_message_selector(unsigned int idx) {
     if (idx == 0 || idx == 1) {
-        settings_show_full_message_change((uint8_t) idx);
+        settings_show_full_message_change((uint8_t)idx);
     }
-    ux_menulist_init_select(0,
-                            settings_submenu_getter,
-                            settings_submenu_selector,
-                            MENU_SHOW_FULL_MSG);
+    ux_menulist_init_select(0, settings_submenu_getter,
+                            settings_submenu_selector, MENU_SHOW_FULL_MSG);
 }
 
 static void allow_blind_signing_selector(unsigned int idx) {
     if (idx == 0 || idx == 1) {
-        settings_allow_blind_signing_change((uint8_t) idx);
+        settings_allow_blind_signing_change((uint8_t)idx);
     }
-    ux_menulist_init_select(0,
-                            settings_submenu_getter,
+    ux_menulist_init_select(0, settings_submenu_getter,
                             settings_submenu_selector,
                             MENU_ALLOW_BLIND_SIGNING);
 }
@@ -74,14 +70,12 @@ static const char* settings_submenu_getter(unsigned int idx) {
 static void settings_submenu_selector(unsigned int idx) {
     switch (idx) {
         case MENU_SHOW_FULL_MSG:
-            ux_menulist_init_select(0,
-                                    binary_choice_getter,
+            ux_menulist_init_select(0, binary_choice_getter,
                                     show_full_message_selector,
                                     N_storage.settings.show_full_message);
             break;
         case MENU_ALLOW_BLIND_SIGNING:
-            ux_menulist_init_select(0,
-                                    binary_choice_getter,
+            ux_menulist_init_select(0, binary_choice_getter,
                                     allow_blind_signing_selector,
                                     N_storage.settings.allow_blind_signing);
             break;

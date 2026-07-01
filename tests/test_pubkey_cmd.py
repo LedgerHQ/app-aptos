@@ -90,7 +90,7 @@ def test_get_public_key_confirm_refused(firmware, backend, navigator, test_name)
                 NavInsID.USE_CASE_STATUS_DISMISS
             ],
             [
-                NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                NavInsID.USE_CASE_REVIEW_NEXT,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
                 NavInsID.USE_CASE_STATUS_DISMISS
             ]
@@ -104,3 +104,8 @@ def test_get_public_key_confirm_refused(firmware, backend, navigator, test_name)
             # Assert that we have received a refusal
             assert e.value.status == Errors.SW_DENY
             assert len(e.value.data) == 0
+            # Wait for the "canceled" status screen to fully dismiss back to the
+            # home screen before starting the next iteration. Otherwise its
+            # residual frame can bleed into the next navigation's first
+            # screenshot, producing flaky snapshot comparisons.
+            navigator.navigate([NavInsID.WAIT_FOR_HOME_SCREEN])

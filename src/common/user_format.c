@@ -15,6 +15,8 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#include "user_format.h"
+
 #include <stdbool.h>  // bool
 #include <stddef.h>   // size_t
 #include <stdint.h>   // int*_t, uint*_t
@@ -22,9 +24,8 @@
 
 #include "format.h"
 
-#include "user_format.h"
-
-int format_prefixed_hex(const uint8_t *in, size_t in_len, char *out, size_t out_len) {
+int format_prefixed_hex(const uint8_t* in, size_t in_len, char* out,
+                        size_t out_len) {
     const char prefix[] = "0x";
     const size_t prefix_len = sizeof(prefix) - 1;
 
@@ -35,7 +36,7 @@ int format_prefixed_hex(const uint8_t *in, size_t in_len, char *out, size_t out_
     return format_hex(in, in_len, out + prefix_len, out_len - prefix_len);
 }
 
-bool is_str_interrupted(const char *src, size_t len) {
+bool is_str_interrupted(const char* src, size_t len) {
     bool interrupted = false;
     for (size_t i = 0; i < len; i++) {
         if (!interrupted && src[i] == 0) {
