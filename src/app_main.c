@@ -18,15 +18,14 @@
 #include <stdint.h>  // uint*_t
 #include <string.h>  // memset, explicit_bzero
 
-#include "os.h"
-#include "ux.h"
-
-#include "types.h"
+#include "apdu/dispatcher.h"
 #include "globals.h"
 #include "io.h"
+#include "os.h"
 #include "sw.h"
+#include "types.h"
 #include "ui/menu.h"
-#include "apdu/dispatcher.h"
+#include "ux.h"
 
 #ifdef HAVE_SWAP
 #include "swap.h"
@@ -41,7 +40,7 @@ void nvm_app_storage_init() {
         storage.settings.show_full_message = 0x00;
         storage.settings.allow_blind_signing = 0x00;
         storage.initialized = 0x01;
-        nvm_write((void *) &N_storage, (void *) &storage, sizeof(app_storage_t));
+        nvm_write((void*)&N_storage, (void*)&storage, sizeof(app_storage_t));
     }
 }
 
@@ -80,20 +79,17 @@ void app_main() {
 
                 // Parse APDU command from G_io_apdu_buffer
                 if (!apdu_parser(&cmd, G_io_apdu_buffer, input_len)) {
-                    PRINTF("=> /!\\ BAD LENGTH: %.*H\n", input_len, G_io_apdu_buffer);
+                    PRINTF("=> /!\\ BAD LENGTH: %.*H\n", input_len,
+                           G_io_apdu_buffer);
                     io_send_sw(SW_WRONG_DATA_LENGTH);
                     CLOSE_TRY;
                     continue;
                 }
 
-                PRINTF("=> CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | CData=%.*H\n",
-                       cmd.cla,
-                       cmd.ins,
-                       cmd.p1,
-                       cmd.p2,
-                       cmd.lc,
-                       cmd.lc,
-                       cmd.data);
+                PRINTF(
+                    "=> CLA=%02X | INS=%02X | P1=%02X | P2=%02X | Lc=%02X | "
+                    "CData=%.*H\n",
+                    cmd.cla, cmd.ins, cmd.p1, cmd.p2, cmd.lc, cmd.lc, cmd.data);
 
                 // Dispatch structured APDU command to handler
                 if (apdu_dispatcher(&cmd) < 0) {
@@ -101,14 +97,9 @@ void app_main() {
                     return;
                 }
             }
-            CATCH(EXCEPTION_IO_RESET) {
-                THROW(EXCEPTION_IO_RESET);
-            }
-            CATCH_OTHER(e) {
-                io_send_sw(e);
-            }
-            FINALLY {
-            }
+            CATCH(EXCEPTION_IO_RESET) { THROW(EXCEPTION_IO_RESET); }
+            CATCH_OTHER(e) { io_send_sw(e); }
+            FINALLY {}
             END_TRY;
         }
     }

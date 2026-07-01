@@ -20,23 +20,22 @@
 #include <stdbool.h>  // bool
 #include <string.h>   // memset
 
-#include "os.h"
-#include "glyphs.h"
-#include "nbgl_use_case.h"
-
-#include "nbgl_display.h"
-#include "display.h"
-#include "menu.h"
-#include "constants.h"
-#include "../globals.h"
 #include "../address.h"
+#include "../globals.h"
 #include "action/validate.h"
+#include "constants.h"
+#include "display.h"
+#include "glyphs.h"
+#include "menu.h"
+#include "nbgl_display.h"
+#include "nbgl_use_case.h"
+#include "os.h"
 
 static void confirm_address(bool choice) {
     validate_pubkey(choice);
-    nbgl_useCaseStatus(choice ? "Address verified" : "Address verification canceled",
-                       choice,
-                       ui_menu_main);
+    nbgl_useCaseStatus(
+        choice ? "Address verified" : "Address verification canceled", choice,
+        ui_menu_main);
 }
 
 int ui_display_address() {
@@ -49,11 +48,8 @@ int ui_display_address() {
         pair_list.nbPairs = 1;
         pair_list.pairs = pairs;
 
-        nbgl_useCaseAddressReview(g_address,
-                                  &pair_list,
-                                  &ICON_APP_HOME,
-                                  "Verify Aptos address",
-                                  NULL,
+        nbgl_useCaseAddressReview(g_address, &pair_list, &ICON_APP_HOME,
+                                  "Verify Aptos address", NULL,
                                   confirm_address);
         return 0;
     }

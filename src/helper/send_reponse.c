@@ -19,12 +19,11 @@
 #include <stdint.h>  // uint*_t
 #include <string.h>  // memmove
 
-#include "buffer.h"
-
-#include "send_response.h"
 #include "../constants.h"
 #include "../globals.h"
 #include "../sw.h"
+#include "buffer.h"
+#include "send_response.h"
 
 int helper_send_response_pubkey() {
     uint8_t resp[1 + 1 + PUBKEY_LEN + 1 + CHAINCODE_LEN] = {0};
@@ -46,7 +45,8 @@ int helper_send_response_sig() {
     size_t offset = 0;
 
     resp[offset++] = G_context.tx_info.signature_len;
-    memmove(resp + offset, G_context.tx_info.signature, G_context.tx_info.signature_len);
+    memmove(resp + offset, G_context.tx_info.signature,
+            G_context.tx_info.signature_len);
     offset += G_context.tx_info.signature_len;
 
     return io_send_response_pointer(resp, offset, SW_OK);

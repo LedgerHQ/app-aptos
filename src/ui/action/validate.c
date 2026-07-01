@@ -15,15 +15,15 @@
  *  limitations under the License.
  *****************************************************************************/
 
+#include "validate.h"
+
 #include <stdbool.h>  // bool
 
-#include "io.h"
-
-#include "validate.h"
-#include "../../sw.h"
 #include "../../crypto.h"
 #include "../../globals.h"
 #include "../../helper/send_response.h"
+#include "../../sw.h"
+#include "io.h"
 
 void validate_pubkey(bool choice) {
     if (choice) {
