@@ -1,5 +1,7 @@
 from application_client.aptos_command_sender import AptosCommandSender
-from application_client.aptos_response_unpacker import unpack_get_app_and_version_response
+from application_client.aptos_response_unpacker import (
+    unpack_get_app_and_version_response,
+)
 from utils import verify_version
 
 
