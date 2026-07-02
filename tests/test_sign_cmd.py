@@ -8,7 +8,6 @@ from utils import ROOT_SCREENSHOT_PATH, check_signature_validity
 
 from aptos_sdk.transactions import RawTransaction, TransactionPayload, TransactionArgument, EntryFunction
 from aptos_sdk.account import AccountAddress
-from aptos_sdk.type_tag import StructTag, TypeTag
 from aptos_sdk.bcs import Serializer
 
 
