@@ -14,23 +14,31 @@ def test_bad_cla(backend):
 # Ensure the app returns an error when a bad INS is used
 def test_bad_ins(backend):
     with pytest.raises(ExceptionRAPDU) as e:
-        backend.exchange(cla=CLA, ins=0xff)
+        backend.exchange(cla=CLA, ins=0xFF)
     assert e.value.status == Errors.SW_INS_NOT_SUPPORTED
 
 
 # Ensure the app returns an error when a bad P1 or P2 is used
 def test_wrong_p1p2(backend):
     with pytest.raises(ExceptionRAPDU) as e:
-        backend.exchange(cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_START + 1, p2=P2.P2_LAST)
+        backend.exchange(
+            cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_START + 1, p2=P2.P2_LAST
+        )
     assert e.value.status == Errors.SW_WRONG_P1P2
     with pytest.raises(ExceptionRAPDU) as e:
-        backend.exchange(cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_START, p2=P2.P2_MORE)
+        backend.exchange(
+            cla=CLA, ins=InsType.GET_VERSION, p1=P1.P1_START, p2=P2.P2_MORE
+        )
     assert e.value.status == Errors.SW_WRONG_P1P2
     with pytest.raises(ExceptionRAPDU) as e:
-        backend.exchange(cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_START + 1, p2=P2.P2_LAST)
+        backend.exchange(
+            cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_START + 1, p2=P2.P2_LAST
+        )
     assert e.value.status == Errors.SW_WRONG_P1P2
     with pytest.raises(ExceptionRAPDU) as e:
-        backend.exchange(cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_START, p2=P2.P2_MORE)
+        backend.exchange(
+            cla=CLA, ins=InsType.GET_APP_NAME, p1=P1.P1_START, p2=P2.P2_MORE
+        )
     assert e.value.status == Errors.SW_WRONG_P1P2
 
 
@@ -49,9 +57,11 @@ def test_wrong_data_length(backend):
 # Ensure there is no state confusion when trying wrong APDU sequences
 def test_invalid_state(backend):
     with pytest.raises(ExceptionRAPDU) as e:
-        backend.exchange(cla=CLA,
-                         ins=InsType.SIGN_TX,
-                         p1=P1.P1_START + 1,  # Try to continue a flow instead of start a new one
-                         p2=P2.P2_MORE,
-                         data=b"abcde")  # data is not parsed in this case
+        backend.exchange(
+            cla=CLA,
+            ins=InsType.SIGN_TX,
+            p1=P1.P1_START + 1,  # Try to continue a flow instead of start a new one
+            p2=P2.P2_MORE,
+            data=b"abcde",
+        )  # data is not parsed in this case
     assert e.value.status == Errors.SW_BAD_STATE
